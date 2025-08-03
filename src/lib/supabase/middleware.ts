@@ -1,3 +1,4 @@
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -52,9 +53,11 @@ export async function updateSession(request: NextRequest) {
         },
       },
     }
-  )
+  );
 
-  await supabase.auth.getSession()
+  // refreshing the session will automatically handle re-authenticating
+  // the user if their session is expired
+  await supabase.auth.getUser()
 
   return response
 }
