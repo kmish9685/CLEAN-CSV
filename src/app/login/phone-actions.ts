@@ -11,11 +11,13 @@ export async function sendOtp(formData: FormData) {
   const supabase = createClient(cookieStore)
   const phone = formData.get('phone') as string
 
-  // Format phone number to E.164 format
-  const formattedPhone = `+${phone.replace(/\D/g, '')}`
+  // The phone number from react-phone-number-input is already in E.164 format
+  if (!phone) {
+    return redirect(`/login?message=${encodeURIComponent("Phone number is required.")}&type=otp-error`)
+  }
 
   const { data, error } = await supabase.auth.signInWithOtp({
-    phone: formattedPhone,
+    phone: phone,
   })
 
   if (error) {
@@ -23,7 +25,7 @@ export async function sendOtp(formData: FormData) {
     return redirect(`/login?message=${encodeURIComponent(error.message)}&type=otp-error`)
   }
 
-  return redirect(`/login?message=OTP sent to ${formattedPhone}.&type=otp-sent&phone=${encodeURIComponent(formattedPhone)}`)
+  return redirect(`/login?message=OTP sent to ${phone}.&type=otp-sent&phone=${encodeURIComponent(phone)}`)
 }
 
 
@@ -32,6 +34,10 @@ export async function verifyOtp(formData: FormData) {
   const supabase = createClient(cookieStore)
   const phone = formData.get('phone') as string
   const token = formData.get('otp') as string
+
+  if (!phone || !token) {
+     return redirect(`/login?message=${encodeURIComponent("Phone number and OTP are required.")}&type=otp-error`)
+  }
 
   const { data, error } = await supabase.auth.verifyOtp({
     phone,

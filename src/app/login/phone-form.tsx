@@ -9,6 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { sendOtp, verifyOtp } from './phone-actions'
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
+import { isValidPhoneNumber } from 'react-phone-number-input'
+
 
 export default function PhoneForm() {
   const searchParams = useSearchParams()
@@ -18,6 +22,7 @@ export default function PhoneForm() {
 
   const [phone, setPhone] = useState(phoneParam || '')
   const [otpSent, setOtpSent] = useState(!!phoneParam)
+  const [error, setError] = useState<string | null>(null)
 
   // Sync the phone number from URL params to state
   useEffect(() => {
@@ -27,6 +32,15 @@ export default function PhoneForm() {
     }
   }, [phoneParam])
 
+  const handleSendOtp = (formData: FormData) => {
+    const phoneValue = formData.get('phone') as string;
+    if (!isValidPhoneNumber(phoneValue)) {
+      setError("Please enter a valid phone number.")
+      return;
+    }
+    setError(null)
+    sendOtp(formData)
+  }
 
   return (
     <Card>
@@ -43,17 +57,26 @@ export default function PhoneForm() {
             <AlertDescription>{message}</AlertDescription>
           </Alert>
         )}
+        {error && (
+            <Alert variant="destructive">
+                <AlertTitle>Invalid Input</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+            </Alert>
+        )}
 
         {!otpSent ? (
-          <form action={sendOtp} className="space-y-4">
+          <form action={handleSendOtp} className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="phone">Phone Number</Label>
-              <Input 
-                id="phone" 
-                name="phone" 
-                type="tel" 
-                placeholder="+15551234567" 
-                required 
+              <PhoneInput
+                id="phone"
+                name="phone"
+                placeholder="Enter phone number"
+                value={phone}
+                onChange={(value) => setPhone(value || '')}
+                defaultCountry="US"
+                international
+                className="w-full"
               />
             </div>
             <Button type="submit" className="w-full">Send Code</Button>
@@ -74,7 +97,10 @@ export default function PhoneForm() {
               />
             </div>
             <Button type="submit" className="w-full">Verify Code & Sign In</Button>
-            <Button variant="link" size="sm" className="w-full" onClick={() => setOtpSent(false)}>
+            <Button variant="link" size="sm" className="w-full" onClick={() => {
+              setOtpSent(false)
+              setPhone('')
+            }}>
               Use a different phone number
             </Button>
           </form>
