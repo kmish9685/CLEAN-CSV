@@ -23,7 +23,7 @@ const steps = [
 ];
 
 const HowItWorks = () => (
-  <section className="bg-gradient-to-b from-white to-secondary/40 py-20 sm:py-24">
+  <section className="bg-gradient-to-b from-background to-secondary/40 py-20 sm:py-24">
     <div className="container mx-auto max-w-7xl px-4">
       <div className="text-center">
         <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Transform Your Data in 3 Simple Steps</h2>

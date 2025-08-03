@@ -3,7 +3,7 @@ import { Check, Lock } from "lucide-react";
 import Image from "next/image";
 
 const Hero = () => (
-  <section id="hero" className="bg-gradient-to-b from-white to-secondary/40 py-20 sm:py-32">
+  <section id="hero" className="bg-gradient-to-b from-background to-secondary/40 py-20 sm:py-32">
     <div className="container mx-auto max-w-7xl px-4">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
         <div className="text-center lg:text-left">
@@ -42,7 +42,7 @@ const Hero = () => (
         </div>
         <div className="rounded-xl bg-card p-4 shadow-lg ring-1 ring-border">
           <Image 
-            src="https://placehold.co/1280x800/e2e8f0/334155.png?text=Before/After+Data+Transformation"
+            src="https://placehold.co/1280x800.png"
             alt="CSV data cleaning transformation illustration"
             width={1280}
             height={800}
