@@ -53,9 +53,10 @@ export async function signup(formData: FormData) {
 
 
 export async function signInWithGoogle() {
-    const cookieStore = cookies()
-    const supabase = createClient(cookieStore)
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore)
 
+  try {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -71,6 +72,10 @@ export async function signInWithGoogle() {
     if (data.url) {
         redirect(data.url)
     }
+  } catch (error: any) {
+    console.error('Google Sign-In Error:', error)
+    return redirect(`/login?message=${encodeURIComponent(error.message)}&type=login-error`)
+  }
 
-    return redirect('/login?message=Could not authenticate with Google&type=login-error')
+  return redirect('/login?message=Could not authenticate with Google&type=login-error')
 }
