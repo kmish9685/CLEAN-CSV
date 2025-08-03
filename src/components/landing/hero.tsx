@@ -42,10 +42,10 @@ const Hero = () => (
         </div>
         <div className="rounded-xl bg-card p-4 shadow-lg ring-1 ring-border">
           <Image 
-            src="https://placehold.co/1280x800/29abe2/ffffff.png"
+            src="https://placehold.co/600x400.png"
             alt="CSV data cleaning transformation illustration"
-            width={1280}
-            height={800}
+            width={600}
+            height={400}
             className="rounded-lg"
             data-ai-hint="data transformation business"
           />
