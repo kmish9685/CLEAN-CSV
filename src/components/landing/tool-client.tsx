@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
@@ -66,26 +67,50 @@ export default function ToolClient() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  const fetchUserPlan = useCallback(async (userId: string) => {
+    const { data: userExtended, error } = await supabase
+      .from('users_extended')
+      .select('plan, rows_used, rows_limit')
+      .eq('user_id', userId)
+      .single();
+    if (userExtended) {
+      setUserPlan(userExtended);
+    }
+    if (error) {
+        console.error("Error fetching user plan details: ", error);
+        toast({
+          title: "Could not load your plan",
+          description: "Your usage details could not be loaded. Please try refreshing.",
+          variant: "destructive"
+        })
+    }
+  }, [supabase, toast]);
+
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       if (user) {
-        const { data: userExtended, error } = await supabase
-          .from('users_extended')
-          .select('plan, rows_used, rows_limit')
-          .eq('user_id', user.id)
-          .single();
-        if (userExtended) {
-          setUserPlan(userExtended);
-        }
-        if (error) {
-            console.error("Error fetching user plan details: ", error);
-        }
+        fetchUserPlan(user.id);
       }
     };
     getUser();
-  }, [supabase]);
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user;
+      setUser(currentUser);
+      if (currentUser) {
+        fetchUserPlan(currentUser.id);
+      } else {
+        setUserPlan(null);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+
+  }, [supabase, fetchUserPlan]);
 
   const previewData = useMemo(() => csvData.slice(0, 5), [csvData]);
   const processedPreviewData = useMemo(() => processedData ? processedData.slice(0, 5) : [], [processedData]);
@@ -231,6 +256,7 @@ export default function ToolClient() {
       });
     }, 200);
 
+    // Simulate processing delay
     setTimeout(async () => {
       const transformedData = applyTransformations(csvData);
       setProcessedData(transformedData);
@@ -308,11 +334,13 @@ export default function ToolClient() {
             </div>
              {user && userPlan && (
                 <div className="p-4 border-t text-center text-sm text-muted-foreground">
-                  Your plan: <span className="font-semibold text-primary">{userPlan.plan}</span>. 
+                  Your plan: <span className="font-semibold text-primary capitalize">{userPlan.plan}</span>. 
                   Usage: <span className="font-semibold">{userPlan.rows_used.toLocaleString()} / {userPlan.rows_limit.toLocaleString()} rows</span> used.
                   {userPlan.plan === 'free' && (
-                     <Button variant="link" className="p-1 h-auto" onClick={() => window.open('https://lemonsqueezy.com', '_blank')}>
-                       Upgrade to Pro <Zap className="ml-1" />
+                     <Button asChild variant="link" className="p-1 h-auto text-accent">
+                        <a href="#pricing">
+                          Upgrade to Pro <Zap className="ml-1 h-4 w-4" />
+                        </a>
                      </Button>
                   )}
                 </div>

@@ -1,6 +1,13 @@
+
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
 
 const pricingTiers = [
   {
@@ -16,6 +23,7 @@ const pricingTiers = [
     ],
     cta: "Start for Free",
     isPopular: false,
+    checkoutUrl: null,
   },
   {
     name: "Pro",
@@ -29,8 +37,9 @@ const pricingTiers = [
       "Priority processing",
       "Email support"
     ],
-    cta: "Get Started",
+    cta: "Upgrade to Pro",
     isPopular: true,
+    checkoutUrl: "https://cleancsv.lemonsqueezy.com/checkout/buy/YOUR-PRO-PLAN-ID",
   },
   {
     name: "Business",
@@ -44,49 +53,90 @@ const pricingTiers = [
       "Custom template creation",
       "Phone support"
     ],
-    cta: "Contact Sales",
+    cta: "Upgrade to Business",
     isPopular: false,
+    checkoutUrl: "https://cleancsv.lemonsqueezy.com/checkout/buy/YOUR-BUSINESS-PLAN-ID",
   }
 ];
 
-const Pricing = () => (
-  <section id="pricing" className="bg-secondary py-20 sm:py-24">
-    <div className="container mx-auto max-w-7xl px-4">
-      <div className="text-center">
-        <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Simple, Transparent Pricing</h2>
-        <p className="mt-4 text-lg text-muted-foreground">Choose the plan that's right for you. Cancel anytime.</p>
+const Pricing = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, [supabase.auth]);
+
+  const handleCheckout = (tier: typeof pricingTiers[0]) => {
+    if (!tier.checkoutUrl) {
+      window.location.href = "#tool";
+      return;
+    }
+    if (!user) {
+      toast({
+        title: "Please log in",
+        description: "You need to be logged in to upgrade your plan.",
+        variant: "destructive",
+      });
+      window.location.href = "/login";
+      return;
+    }
+    let url = tier.checkoutUrl;
+    url += `?checkout[email]=${user.email}&checkout[custom][user_id]=${user.id}`;
+    window.open(url, '_blank');
+  };
+
+  return (
+    <section id="pricing" className="bg-secondary py-20 sm:py-24">
+      <div className="container mx-auto max-w-7xl px-4">
+        <div className="text-center">
+          <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Simple, Transparent Pricing</h2>
+          <p className="mt-4 text-lg text-muted-foreground">Choose the plan that's right for you. Cancel anytime.</p>
+        </div>
+        <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {pricingTiers.map((tier) => (
+            <Card key={tier.name} className={`flex flex-col ${tier.isPopular ? 'border-primary ring-2 ring-primary' : ''}`}>
+              <CardHeader>
+                <CardTitle className="font-headline">{tier.name}</CardTitle>
+                <div className="flex items-baseline">
+                  <span className="text-4xl font-bold">{tier.price}</span>
+                  <span className="text-muted-foreground">{tier.frequency}</span>
+                </div>
+                <CardDescription>{tier.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <ul className="space-y-4">
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <Check className="h-5 w-5 text-primary" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  className="w-full" 
+                  variant={tier.isPopular ? "default" : "outline"}
+                  onClick={() => handleCheckout(tier)}
+                >
+                  {tier.cta}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+            <p className="text-xs text-muted-foreground">Please replace `YOUR-PRO-PLAN-ID` and `YOUR-BUSINESS-PLAN-ID` with your actual Lemon Squeezy product variant IDs.</p>
+        </div>
       </div>
-      <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {pricingTiers.map((tier) => (
-          <Card key={tier.name} className={`flex flex-col ${tier.isPopular ? 'border-primary ring-2 ring-primary' : ''}`}>
-            <CardHeader>
-              <CardTitle className="font-headline">{tier.name}</CardTitle>
-              <div className="flex items-baseline">
-                <span className="text-4xl font-bold">{tier.price}</span>
-                <span className="text-muted-foreground">{tier.frequency}</span>
-              </div>
-              <CardDescription>{tier.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <ul className="space-y-4">
-                {tier.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2">
-                    <Check className="h-5 w-5 text-primary" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full" variant={tier.isPopular ? "default" : "outline"}>
-                {tier.cta}
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default Pricing;

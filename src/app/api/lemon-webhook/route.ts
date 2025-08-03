@@ -1,48 +1,72 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
+
+// These are sensitive and should be in environment variables
+const SUPABASE_URL = "https://ncrgcgcuucfcntjqqizn.supabase.co";
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // You MUST set this in your project's environment variables
+const LEMON_SQUEEZY_WEBHOOK_SECRET = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET; // You MUST set this in your project's environment variables
+
+if (!SUPABASE_SERVICE_ROLE_KEY || !LEMON_SQUEEZY_WEBHOOK_SECRET) {
+  console.error("Missing required environment variables for Lemon Squeezy webhook.");
+}
+
+// Use the service role client for elevated privileges
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY!);
 
 export async function POST(req: NextRequest) {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  if (!LEMON_SQUEEZY_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+  }
 
   try {
-    const { event_name, data } = await req.json();
+    const rawBody = await req.text();
+    const hmac = crypto.createHmac('sha256', LEMON_SQUEEZY_WEBHOOK_SECRET);
+    const digest = Buffer.from(hmac.update(rawBody).digest('hex'), 'utf8');
+    const signature = Buffer.from(req.headers.get('X-Signature') || '', 'utf8');
 
-    if (event_name === "subscription_created" || event_name === "subscription_updated") {
-      const email = data.attributes.user_email;
-      const plan = data.attributes.variant_name.toLowerCase(); // 'Pro' -> 'pro'
-      let new_limit = 5000;
+    if (!crypto.timingSafeEqual(digest, signature)) {
+      console.warn("Invalid Lemon Squeezy webhook signature.");
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
 
-      if (plan === 'pro') {
-        new_limit = 50000;
-      } else if (plan === 'business') {
-        new_limit = 500000;
+    const { meta, data } = JSON.parse(rawBody);
+
+    if (meta.event_name === "subscription_created" || meta.event_name === "subscription_updated") {
+      const userId = meta.custom_data?.user_id;
+      if (!userId) {
+        console.error("Webhook missing user_id in custom_data");
+        return NextResponse.json({ error: 'User ID not found in webhook payload' }, { status: 400 });
       }
-
-      // Find user by email in auth.users
-      const { data: authUser, error: authError } = await supabase.from('users').select('id').eq('email', email).single();
       
-      if (authError || !authUser) {
-        console.error('User not found in auth.users:', email);
-        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      const variantName = data.attributes.variant_name.toLowerCase();
+      let newPlan = 'free';
+      let newLimit = 5000;
+
+      if (variantName.includes('pro')) {
+        newPlan = 'pro';
+        newLimit = 50000;
+      } else if (variantName.includes('business')) {
+        newPlan = 'business';
+        newLimit = 500000;
       }
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('users_extended')
-        .update({ plan: plan, rows_limit: new_limit })
-        .eq('user_id', authUser.id);
+        .update({ plan: newPlan, rows_limit: newLimit })
+        .eq('user_id', userId);
       
       if (updateError) {
-        console.error('Error updating user plan:', updateError);
+        console.error(`Error updating plan for user ${userId}:`, updateError);
         return NextResponse.json({ error: 'Failed to update plan' }, { status: 500 });
       }
+      console.log(`Successfully updated plan for user ${userId} to ${newPlan}`);
     }
 
     return NextResponse.json({ received: true }, { status: 200 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Webhook processing error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: `Internal Server Error: ${error.message}` }, { status: 500 });
   }
 }
