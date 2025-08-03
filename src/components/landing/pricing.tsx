@@ -39,8 +39,8 @@ const pricingTiers = [
     ],
     cta: "Upgrade to Pro",
     isPopular: true,
-    // IMPORTANT: Replace with your actual Lemon Squeezy Pro plan variant ID
-    checkoutUrl: "https://<YOUR_STORE>.lemonsqueezy.com/checkout/buy/YOUR-PRO-PLAN-ID",
+    // IMPORTANT: Replace with your actual Lemon Squeezy Pro plan variant URL
+    checkoutUrl: "https://<YOUR_STORE>.lemonsqueezy.com/buy/<YOUR-PRO-VARIANT-ID>",
   },
   {
     name: "Business",
@@ -56,8 +56,8 @@ const pricingTiers = [
     ],
     cta: "Upgrade to Business",
     isPopular: false,
-    // IMPORTANT: Replace with your actual Lemon Squeezy Business plan variant ID
-    checkoutUrl: "https://<YOUR_STORE>.lemonsqueezy.com/checkout/buy/YOUR-BUSINESS-PLAN-ID",
+    // IMPORTANT: Replace with your actual Lemon Squeezy Business plan variant URL
+    checkoutUrl: "https://<YOUR_STORE>.lemonsqueezy.com/buy/<YOUR-BUSINESS-VARIANT-ID>",
   }
 ];
 
@@ -80,7 +80,6 @@ const Pricing = () => {
     return () => {
       authListener.subscription.unsubscribe();
     };
-
   }, [supabase.auth]);
 
   const handleCheckout = (tier: typeof pricingTiers[0]) => {
@@ -151,7 +150,7 @@ const Pricing = () => {
           ))}
         </div>
         <div className="text-center mt-8">
-            <p className="text-xs text-muted-foreground">Please replace `<YOUR_STORE>` and variant IDs in `src/components/landing/pricing.tsx` with your actual Lemon Squeezy details.</p>
+            <p className="text-xs text-muted-foreground">Please replace checkout URLs in `src/components/landing/pricing.tsx` with your actual Lemon Squeezy details.</p>
         </div>
       </div>
     </section>
