@@ -18,29 +18,31 @@ function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+          <form>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="m@example.com"
+                  required
+                />
               </div>
-              <Input id="password" name="password" type="password" required />
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                </div>
+                <Input id="password" name="password" type="password" required />
+              </div>
+              <Button formAction={login} className="w-full">
+                Login
+              </Button>
+              <Button formAction={signup} variant="outline" className="w-full">
+                Sign up
+              </Button>
             </div>
-            <Button formAction={login} className="w-full">
-              Login
-            </Button>
-            <Button formAction={signup} variant="outline" className="w-full">
-              Sign up
-            </Button>
           </form>
         </CardContent>
       </Card>
