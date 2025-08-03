@@ -42,7 +42,7 @@ const Hero = () => (
         </div>
         <div className="rounded-xl bg-card p-4 shadow-lg ring-1 ring-border">
           <Image 
-            src="https://storage.googleapis.com/project-os-prod-resources/clean-csv/hero.png"
+            src="https://images.unsplash.com/photo-1718202248160-59558af70521?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHwzRHxlbnwwfHx8fDE3NTQyMzMwMjh8MA&ixlib=rb-4.1.0&q=80&w=1080"
             alt="CSV data cleaning transformation illustration"
             width={600}
             height={400}
