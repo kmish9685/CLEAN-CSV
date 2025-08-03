@@ -40,7 +40,7 @@ const pricingTiers = [
     cta: "Upgrade to Pro",
     isPopular: true,
     // IMPORTANT: Replace with your actual Lemon Squeezy Pro plan variant ID
-    checkoutUrl: "https://cleancsv.lemonsqueezy.com/checkout/buy/YOUR-PRO-PLAN-ID",
+    checkoutUrl: "https://<YOUR_STORE>.lemonsqueezy.com/checkout/buy/YOUR-PRO-PLAN-ID",
   },
   {
     name: "Business",
@@ -57,7 +57,7 @@ const pricingTiers = [
     cta: "Upgrade to Business",
     isPopular: false,
     // IMPORTANT: Replace with your actual Lemon Squeezy Business plan variant ID
-    checkoutUrl: "https://cleancsv.lemonsqueezy.com/checkout/buy/YOUR-BUSINESS-PLAN-ID",
+    checkoutUrl: "https://<YOUR_STORE>.lemonsqueezy.com/checkout/buy/YOUR-BUSINESS-PLAN-ID",
   }
 ];
 
@@ -106,7 +106,7 @@ const Pricing = () => {
     // Add user details to the checkout URL
     url += `?checkout[email]=${encodeURIComponent(user.email!)}&checkout[custom][user_id]=${user.id}`;
     // Add redirect URL to bring user back to dashboard
-    url += `&checkout[redirect_url]=${window.location.origin}/dashboard`;
+    url += `&checkout[redirect_url]=${window.location.origin}/app`;
     window.open(url, '_blank');
   };
 
@@ -151,7 +151,7 @@ const Pricing = () => {
           ))}
         </div>
         <div className="text-center mt-8">
-            <p className="text-xs text-muted-foreground">Please replace `YOUR-PRO-PLAN-ID` and `YOUR-BUSINESS-PLAN-ID` with your actual Lemon Squeezy product variant IDs.</p>
+            <p className="text-xs text-muted-foreground">Please replace `<YOUR_STORE>` and variant IDs in `src/components/landing/pricing.tsx` with your actual Lemon Squeezy details.</p>
         </div>
       </div>
     </section>
