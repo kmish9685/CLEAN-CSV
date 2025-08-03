@@ -48,8 +48,8 @@ const Hero = () => (
                     className="rounded-lg"
                     data-ai-hint="data transformation business"
                 />
+                <HowItWorks />
             </div>
-            <HowItWorks />
         </div>
       </div>
     </div>

@@ -23,21 +23,21 @@ const steps = [
 ];
 
 const HowItWorks = () => (
-  <div className="w-full">
-      <h2 className="font-headline text-2xl font-bold tracking-tight text-foreground text-center mb-2">Transform Your Data in 3 Simple Steps</h2>
+  <div className="w-full pt-4 mt-4 border-t">
+      <h2 className="font-headline text-lg font-bold tracking-tight text-foreground text-center mb-2">Transform Your Data in 3 Simple Steps</h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {steps.map((step) => (
           <Card key={step.title} className="text-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg bg-card/80 backdrop-blur-sm">
-            <CardHeader className="p-4">
-              <div className="relative mx-auto flex h-16 w-16 items-center justify-center">
-                <div className="absolute text-6xl font-bold font-headline text-primary/10 -top-3">{step.step}</div>
-                <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <step.icon className="h-6 w-6" />
+            <CardHeader className="p-2">
+              <div className="relative mx-auto flex h-12 w-12 items-center justify-center">
+                <div className="absolute text-5xl font-bold font-headline text-primary/10 -top-2">{step.step}</div>
+                <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <step.icon className="h-5 w-5" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-4 pt-0 flex flex-col items-center">
-              <CardTitle className="font-headline text-base mb-1">{step.title}</CardTitle>
+            <CardContent className="p-2 pt-0 flex flex-col items-center">
+              <CardTitle className="font-headline text-sm mb-1">{step.title}</CardTitle>
               <CardDescription className="text-xs">{step.description}</CardDescription>
             </CardContent>
           </Card>
