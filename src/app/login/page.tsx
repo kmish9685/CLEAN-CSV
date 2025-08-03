@@ -39,7 +39,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-secondary">
       <Tabs defaultValue="login" className="w-full max-w-sm mx-4">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="login">Email</TabsTrigger>
+          <TabsTrigger value="login">Login</TabsTrigger>
           <TabsTrigger value="phone">Phone</TabsTrigger>
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
         </TabsList>
