@@ -51,5 +51,5 @@ export async function verifyOtp(formData: FormData) {
   }
   
   revalidatePath('/', 'layout')
-  redirect('/')
+  redirect('/dashboard')
 }
