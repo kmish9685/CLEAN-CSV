@@ -19,12 +19,12 @@ const Hero = () => (
       </div>
       <div className="rounded-xl bg-card p-4 shadow-lg ring-1 ring-border">
          <Image 
-          src="https://placehold.co/1200x800.png"
-          alt="Before and after CSV preview"
-          width={1200}
+          src="https://placehold.co/1280x800.png"
+          alt="CSV data cleaning transformation illustration"
+          width={1280}
           height={800}
           className="rounded-lg"
-          data-ai-hint="csv data table"
+          data-ai-hint="data transformation business"
         />
       </div>
     </div>
