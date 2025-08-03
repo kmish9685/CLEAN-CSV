@@ -42,7 +42,7 @@ const Hero = () => (
         </div>
         <div className="rounded-xl bg-card p-4 shadow-lg ring-1 ring-border">
           <Image 
-            src="https://placehold.co/600x400.png"
+            src="https://storage.googleapis.com/project-os-prod-resources/clean-csv/hero.png"
             alt="CSV data cleaning transformation illustration"
             width={600}
             height={400}
