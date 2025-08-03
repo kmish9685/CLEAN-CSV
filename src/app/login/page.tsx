@@ -5,9 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login, signup } from "./actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-function LoginForm() {
+
+export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const message = searchParams.get('message');
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-secondary">
       <Card className="mx-auto max-w-sm">
@@ -20,6 +25,11 @@ function LoginForm() {
         <CardContent>
           <form>
             <div className="grid gap-4">
+              {message && (
+                <Alert variant="destructive">
+                  <AlertDescription>{message}</AlertDescription>
+                </Alert>
+              )}
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -48,15 +58,4 @@ function LoginForm() {
       </Card>
     </div>
   );
-}
-
-
-export default function LoginPage() {
-  const [isClient, setIsClient] = useState(false)
- 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
- 
-  return isClient ? <LoginForm /> : null;
 }
