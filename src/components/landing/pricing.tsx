@@ -17,7 +17,7 @@ const pricingTiers = [
     description: "Perfect for trying us out",
     features: [
       "3 files per month",
-      "Up to 1,000 rows per file",
+      "Up to 5,000 rows per file",
       "Basic templates only",
       "Standard processing"
     ],
@@ -39,6 +39,7 @@ const pricingTiers = [
     ],
     cta: "Upgrade to Pro",
     isPopular: true,
+    // IMPORTANT: Replace with your actual Lemon Squeezy Pro plan variant ID
     checkoutUrl: "https://cleancsv.lemonsqueezy.com/checkout/buy/YOUR-PRO-PLAN-ID",
   },
   {
@@ -55,6 +56,7 @@ const pricingTiers = [
     ],
     cta: "Upgrade to Business",
     isPopular: false,
+    // IMPORTANT: Replace with your actual Lemon Squeezy Business plan variant ID
     checkoutUrl: "https://cleancsv.lemonsqueezy.com/checkout/buy/YOUR-BUSINESS-PLAN-ID",
   }
 ];
@@ -70,11 +72,23 @@ const Pricing = () => {
       setUser(user);
     };
     getUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+
   }, [supabase.auth]);
 
   const handleCheckout = (tier: typeof pricingTiers[0]) => {
     if (!tier.checkoutUrl) {
-      window.location.href = "#tool";
+      const toolElement = document.getElementById('tool');
+      if (toolElement) {
+        toolElement.scrollIntoView({ behavior: 'smooth' });
+      }
       return;
     }
     if (!user) {
@@ -83,11 +97,16 @@ const Pricing = () => {
         description: "You need to be logged in to upgrade your plan.",
         variant: "destructive",
       });
+      // Save the intended destination and redirect to login
+      sessionStorage.setItem('upgrade_redirect', tier.checkoutUrl);
       window.location.href = "/login";
       return;
     }
     let url = tier.checkoutUrl;
-    url += `?checkout[email]=${user.email}&checkout[custom][user_id]=${user.id}`;
+    // Add user details to the checkout URL
+    url += `?checkout[email]=${encodeURIComponent(user.email!)}&checkout[custom][user_id]=${user.id}`;
+    // Add redirect URL to bring user back to dashboard
+    url += `&checkout[redirect_url]=${window.location.origin}/dashboard`;
     window.open(url, '_blank');
   };
 
