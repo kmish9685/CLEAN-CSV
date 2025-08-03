@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Chrome } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import PhoneForm from "./phone-form";
 
 export default function LoginPage() {
   const [isClient, setIsClient] = useState(false);
@@ -25,8 +27,9 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-secondary">
       <Tabs defaultValue="login" className="w-full max-w-sm mx-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">Login</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="login">Email</TabsTrigger>
+          <TabsTrigger value="phone">Phone</TabsTrigger>
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
         </TabsList>
         <TabsContent value="login">
@@ -96,6 +99,9 @@ export default function LoginPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="phone">
+          <PhoneForm />
         </TabsContent>
         <TabsContent value="signup">
           <Card>
