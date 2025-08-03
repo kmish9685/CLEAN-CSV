@@ -1,33 +1,50 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/landing/logo";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 
-const UserMenu = ({ user }: { user: any }) => {
+const UserMenu = ({ user }: { user: User }) => {
+  const supabase = createClient();
   const signOut = async () => {
-    "use server";
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
     await supabase.auth.signOut();
+    // Hard refresh to clear state
+    window.location.href = "/";
   };
 
   return (
     <div className="flex items-center space-x-4">
-      <span>{user.email}</span>
-      <form action={signOut}>
-        <Button variant="ghost" type="submit">Log Out</Button>
-      </form>
+      <span className="text-sm text-muted-foreground hidden sm:inline-block">{user.email}</span>
+      <Button variant="ghost" onClick={signOut}>Log Out</Button>
     </div>
   );
 };
 
-const Header = async () => {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+const Header = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+
+    getUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -35,7 +52,9 @@ const Header = async () => {
         <Logo />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
-            {user ? (
+            {loading ? (
+              <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
+            ) : user ? (
               <UserMenu user={user} />
             ) : (
               <>
