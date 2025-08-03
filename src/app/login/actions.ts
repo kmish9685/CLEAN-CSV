@@ -20,7 +20,7 @@ export async function login(formData: FormData) {
 
   if (error) {
     console.error(error)
-    return redirect('/login?message=Could not authenticate user')
+    return redirect(`/login?message=${encodeURIComponent(error.message)}&type=login-error`)
   }
 
   revalidatePath('/', 'layout')
@@ -44,9 +44,33 @@ export async function signup(formData: FormData) {
 
   if (error) {
     console.log(error)
-    return redirect('/login?message=Could not create user')
+    return redirect(`/login?message=${encodeURIComponent(error.message)}&type=signup-error`)
   }
 
   revalidatePath('/', 'layout')
-  return redirect('/login?message=Check email to continue sign in process')
+  return redirect('/login?message=Check email to continue sign in process&type=success')
+}
+
+
+export async function signInWithGoogle() {
+    const cookieStore = cookies()
+    const supabase = createClient(cookieStore)
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        },
+    })
+
+    if (error) {
+        console.log(error)
+        return redirect(`/login?message=${encodeURIComponent(error.message)}&type=login-error`)
+    }
+    
+    if (data.url) {
+        redirect(data.url)
+    }
+
+    return redirect('/login?message=Could not authenticate with Google&type=login-error')
 }
