@@ -41,8 +41,15 @@ export default function LoginPage() {
               {!isClient ? (
                 <div className="space-y-4">
                   <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-11 w-full" />
+                  <Skeleton className="h-4 w-24" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
                   <Skeleton className="h-11 w-full" />
                 </div>
               ) : (
@@ -102,8 +109,15 @@ export default function LoginPage() {
               {!isClient ? (
                   <div className="space-y-4">
                     <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-11 w-full" />
+                    <Skeleton className="h-4 w-24" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
                     <Skeleton className="h-11 w-full" />
                   </div>
                 ) : (
