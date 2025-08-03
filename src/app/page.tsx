@@ -1,6 +1,6 @@
 import Header from "@/components/landing/header";
 import Hero from "@/components/landing/hero";
-import Problem from "@/components/landing/problem";
+import HowItWorks from "@/components/landing/how-it-works";
 import Solution from "@/components/landing/solution";
 import Tool from "@/components/landing/tool";
 import Pricing from "@/components/landing/pricing";
@@ -14,7 +14,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
-        <Problem />
+        <HowItWorks />
         <Solution />
         <Tool />
         <Pricing />
