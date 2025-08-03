@@ -31,7 +31,7 @@ const HowItWorks = () => (
             <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary flex-shrink-0">
                 <step.icon className="h-4 w-4" />
             </div>
-            <div className="flex-1">
+            <div>
               <CardTitle className="font-headline text-sm mb-1">{step.title}</CardTitle>
               <CardDescription className="text-xs">{step.description}</CardDescription>
             </div>
