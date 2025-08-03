@@ -9,10 +9,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { login, signup, signInWithGoogle } from "./actions";
 import { useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Chrome } from "lucide-react";
+import { Chrome, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import PhoneForm from "./phone-form";
+import { useFormStatus } from "react-dom";
+
+function SubmitButton({ children, ...props }: React.ComponentProps<typeof Button>) {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} {...props}>
+      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+      {pending ? "Please wait..." : children}
+    </Button>
+  );
+}
 
 export default function LoginPage() {
   const [isClient, setIsClient] = useState(false);
@@ -58,10 +69,10 @@ export default function LoginPage() {
               ) : (
                 <>
                   <form action={signInWithGoogle} className="w-full">
-                    <Button variant="outline" className="w-full">
-                      <Chrome className="mr-2 h-4 w-4" /> Sign in with Google
-                    </Button>
-                  </form>
+                     <Button variant="outline" className="w-full">
+                       <Chrome className="mr-2 h-4 w-4" /> Sign in with Google
+                     </Button>
+                   </form>
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t" />
@@ -93,7 +104,7 @@ export default function LoginPage() {
                       <Label htmlFor="password">Password</Label>
                       <Input id="password" name="password" type="password" required />
                     </div>
-                    <Button type="submit" className="w-full">Login</Button>
+                    <SubmitButton className="w-full">Login</SubmitButton>
                   </form>
                 </>
               )}
@@ -158,7 +169,7 @@ export default function LoginPage() {
                       <Label htmlFor="password-signup">Password</Label>
                       <Input id="password-signup" name="password" type="password" required />
                     </div>
-                    <Button type="submit" className="w-full">Sign Up</Button>
+                    <SubmitButton className="w-full">Sign Up</SubmitButton>
                   </form>
                 </>
                 )}

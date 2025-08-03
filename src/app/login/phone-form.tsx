@@ -12,7 +12,18 @@ import { sendOtp, verifyOtp } from './phone-actions'
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import { isValidPhoneNumber } from 'react-phone-number-input'
+import { useFormStatus } from 'react-dom'
+import { Loader2 } from 'lucide-react'
 
+function PhoneSubmitButton({ children, ...props }: React.ComponentProps<typeof Button>) {
+    const { pending } = useFormStatus();
+    return (
+      <Button type="submit" disabled={pending} {...props}>
+        {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        {pending ? "Please wait..." : children}
+      </Button>
+    );
+  }
 
 export default function PhoneForm() {
   const searchParams = useSearchParams()
@@ -34,7 +45,7 @@ export default function PhoneForm() {
 
   const handleSendOtp = (formData: FormData) => {
     const phoneValue = formData.get('phone') as string;
-    if (!isValidPhoneNumber(phoneValue)) {
+    if (!phoneValue || !isValidPhoneNumber(phoneValue)) {
       setError("Please enter a valid phone number.")
       return;
     }
@@ -79,7 +90,7 @@ export default function PhoneForm() {
                 className="w-full"
               />
             </div>
-            <Button type="submit" className="w-full">Send Code</Button>
+            <PhoneSubmitButton className="w-full">Send Code</PhoneSubmitButton>
           </form>
         ) : (
           <form action={verifyOtp} className="space-y-4">
@@ -96,7 +107,7 @@ export default function PhoneForm() {
                 required 
               />
             </div>
-            <Button type="submit" className="w-full">Verify Code & Sign In</Button>
+            <PhoneSubmitButton className="w-full">Verify Code & Sign In</PhoneSubmitButton>
             <Button variant="link" size="sm" className="w-full" onClick={() => {
               setOtpSent(false)
               setPhone('')
