@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { UploadCloud, File as FileIcon, X, BrainCircuit, Sparkles, Loader2, Download, Wand2, RefreshCw, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import OnboardingTour from "../OnboardingTour";
 
 type CleaningStrategy = {
   id: string;
@@ -258,6 +259,7 @@ export default function ToolClient() {
 
   return (
     <section id="tool" className="container mx-auto max-w-7xl px-4 py-20 sm:py-24">
+      <OnboardingTour />
       <div className="text-center mb-12">
         <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">The Cleaning Tool</h2>
         <p className="mt-4 text-lg text-muted-foreground">Upload your file and see the magic happen.</p>
@@ -266,7 +268,7 @@ export default function ToolClient() {
       <Card className="w-full shadow-xl">
         {!file ? (
           <CardContent className="p-0">
-            <div {...getRootProps()} className={`flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${isDragActive ? 'border-primary bg-primary/10' : ''}`}>
+            <div id="upload-area" {...getRootProps()} className={`flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${isDragActive ? 'border-primary bg-primary/10' : ''}`}>
               <input {...getInputProps()} />
               <UploadCloud className="w-12 h-12 text-muted-foreground mb-4" />
               <p className="font-semibold">Drag & drop a CSV file here, or click to select a file</p>
@@ -359,10 +361,10 @@ export default function ToolClient() {
                 {isProcessing && <Progress value={progress} className="w-full mt-4" />}
                 
                 <div className="mt-6 flex gap-4">
-                  <Button onClick={processFile} disabled={isProcessing || selectedStrategies.size === 0} className="w-full" size="lg">
+                  <Button id="process-button" onClick={processFile} disabled={isProcessing || selectedStrategies.size === 0} className="w-full" size="lg">
                     {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : "Process File"}
                   </Button>
-                  <Button onClick={downloadFile} disabled={!processedData || isProcessing} className="w-full" size="lg" variant="outline">
+                  <Button id="download-button" onClick={downloadFile} disabled={!processedData || isProcessing} className="w-full" size="lg" variant="outline">
                     <Download className="mr-2 h-4 w-4" /> Download
                   </Button>
                 </div>
