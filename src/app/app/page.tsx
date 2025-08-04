@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Star } from 'lucide-react';
+import { CheckCircle, Star, MailWarning } from 'lucide-react';
 import Link from 'next/link';
 
 async function App() {
@@ -25,6 +25,32 @@ async function App() {
     await supabase.auth.signOut();
     return redirect('/');
   };
+
+  // If the user is logged in but their email is not yet confirmed,
+  // show them a message to check their email.
+  if (user && !user.email_confirmed_at) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-secondary p-4">
+            <Card className="w-full max-w-md text-center">
+                <CardHeader>
+                    <MailWarning className="w-16 h-16 mx-auto text-primary" />
+                    <CardTitle className="mt-4 text-2xl">Confirm Your Email</CardTitle>
+                    <CardDescription className="mt-2">
+                        We've sent a confirmation link to <strong>{user.email}</strong>.
+                        Please check your inbox (and spam folder) to complete your registration.
+                    </CardDescription>
+                </CardHeader>
+                <CardFooter>
+                    <form action={signOut} className="w-full">
+                        <Button type="submit" variant="outline" className="w-full">
+                            Back to Login
+                        </Button>
+                    </form>
+                </CardFooter>
+            </Card>
+        </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-secondary p-4">
