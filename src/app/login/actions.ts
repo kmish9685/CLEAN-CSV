@@ -61,34 +61,5 @@ export async function signup(formData: FormData) {
 
 
   revalidatePath('/', 'layout');
-  return redirect(`/login?message=Verification link sent to ${email}. Please check your inbox.&type=success`);
-}
-
-
-export async function signInWithGoogle() {
-  const cookieStore = cookies()
-  const supabase = createClient(cookieStore)
-
-  try {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-        },
-    })
-
-    if (error) {
-        console.log(error)
-        return redirect(`/login?message=${encodeURIComponent(error.message)}&type=login-error`)
-    }
-    
-    if (data.url) {
-        redirect(data.url)
-    }
-  } catch (error: any) {
-    console.error('Google Sign-In Error:', error)
-    return redirect(`/login?message=${encodeURIComponent(error.message)}&type=login-error`)
-  }
-
-  return redirect('/login?message=Could not authenticate with Google&type=login-error')
+  return redirect(`/login?message=Verification link sent to ${email}. Please check your inbox.&type=signup-success`);
 }

@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { login, signup, signInWithGoogle } from "./actions";
+import { login, signup } from "./actions";
 import { useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Chrome, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import PhoneForm from "./phone-form";
@@ -43,7 +43,7 @@ function LoginMessages() {
         )
     }
 
-    if (messageType === 'success') {
+    if (messageType === 'success' || messageType === 'signup-success') {
         return (
             <Alert>
                 <AlertTitle>Success!</AlertTitle>
@@ -97,7 +97,6 @@ function LoginPageContent() {
             <CardContent className="space-y-4">
               {!isClient ? (
                 <div className="space-y-4">
-                  <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-4 w-24" />
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-16" />
@@ -111,21 +110,6 @@ function LoginPageContent() {
                 </div>
               ) : (
                 <>
-                  <form action={signInWithGoogle} className="w-full">
-                     <Button variant="outline" className="w-full">
-                       <Chrome className="mr-2 h-4 w-4" /> Sign in with Google
-                     </Button>
-                   </form>
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
-                        Or continue with
-                      </span>
-                    </div>
-                  </div>
                   <form action={login} className="space-y-4">
                      <LoginMessages />
                     <div className="grid gap-2">
@@ -157,7 +141,6 @@ function LoginPageContent() {
             <CardContent className="space-y-4">
               {!isClient ? (
                   <div className="space-y-4">
-                    <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-4 w-24" />
                     <div className="space-y-2">
                       <Skeleton className="h-4 w-16" />
@@ -171,21 +154,6 @@ function LoginPageContent() {
                   </div>
                 ) : (
                 <>
-                  <form action={signInWithGoogle}>
-                    <Button variant="outline" className="w-full">
-                      <Chrome className="mr-2 h-4 w-4" /> Sign up with Google
-                    </Button>
-                  </form>
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
-                        Or continue with
-                      </span>
-                    </div>
-                  </div>
                   <form action={signup} className="space-y-4">
                     <SignupMessages />
                     <div className="grid gap-2">
