@@ -27,7 +27,7 @@ const TermsPage = () => {
             <div>
             <h2 className="font-headline text-2xl font-bold mt-8 mb-3">1. Services</h2>
             <p>
-                We provide tools that allow users to clean and process CSV files. Premium features may require a paid subscription.
+                We provide tools that allow users to clean and process CSV and PDF files. Premium features may require a paid subscription.
             </p>
             </div>
 
