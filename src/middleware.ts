@@ -1,17 +1,6 @@
 import { type NextRequest } from 'next/server'
-import { updateSession, createClient } from '@/lib/supabase/middleware'
-import { sendVerificationEmail } from '@/lib/sendVerificationEmail';
+import { updateSession } from '@/lib/supabase/middleware'
 
-const supabase = createClient();
-
-supabase.auth.onAuthStateChange(async (event, session) => {
- if (event === 'USER_SIGNED_UP') {
- const user = session?.user;
- if (user?.email && user?.id) {
- await sendVerificationEmail(user.email, user.id); // or use user.confirmation_token if needed
-    }
-  }
-});
 export async function middleware(request: NextRequest) {
   return await updateSession(request)
 }
