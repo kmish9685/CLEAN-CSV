@@ -94,14 +94,19 @@ async function App() {
 
         </CardContent>
         <CardFooter className="border-t pt-6">
-            <form action={signOut} className="w-full">
-                <Button className="w-full" type="submit" variant="outline">
-                Sign Out
-                </Button>
-            </form>
+            <Button className="w-full" asChild>
+                <Link href="/#tool">Ready To Go</Link>
+            </Button>
         </CardFooter>
       </Card>
-      <p className="text-xs text-muted-foreground mt-4">This is your protected app page. Only authenticated users can see this.</p>
+      <div className="mt-4 flex items-center gap-4">
+        <p className="text-xs text-muted-foreground">This is your protected app page. Only authenticated users can see this.</p>
+        <form action={signOut}>
+            <Button type="submit" variant="link" size="sm" className="text-xs p-0 h-auto">
+            Sign Out
+            </Button>
+        </form>
+      </div>
     </div>
   );
 }
