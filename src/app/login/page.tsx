@@ -26,6 +26,8 @@ function SubmitButton({ children, ...props }: React.ComponentProps<typeof Button
 }
 
 function LoginMessages() {
+    // This component uses the useSearchParams hook, which is why its parent
+    // needs to be wrapped in a <Suspense> boundary.
     const searchParams = useSearchParams();
     const message = searchParams.get('message');
     const messageType = searchParams.get('type');
@@ -54,6 +56,7 @@ function LoginMessages() {
 }
 
 function SignupMessages() {
+    // This component also uses the useSearchParams hook.
     const searchParams = useSearchParams();
     const message = searchParams.get('message');
     const messageType = searchParams.get('type');
@@ -207,8 +210,11 @@ function LoginPageContent() {
 
 
 export default function LoginPage() {
+  // Wrapping LoginPageContent in <Suspense> is required because it uses the
+  // useSearchParams() hook for reading URL parameters. Next.js needs this
+  // to handle dynamic rendering on the client side correctly.
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div>Loading...</div></div>}>
       <LoginPageContent />
     </Suspense>
   );
