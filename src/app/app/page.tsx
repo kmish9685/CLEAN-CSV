@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Star, Zap } from 'lucide-react';
+import { CheckCircle, Star } from 'lucide-react';
 import Link from 'next/link';
 
 async function App() {
@@ -26,7 +26,6 @@ async function App() {
 
   if (error && error.code !== 'PGRST116') { // Ignore error when no rows are found
     console.error('Error fetching user plan:', error);
-    // You might want to show an error page here
   }
   
   const planName = userPlan?.plan || 'free';
@@ -56,19 +55,11 @@ async function App() {
         </CardHeader>
         <CardContent className="space-y-6">
           
-          {/* Usage Info */}
           {userPlan && (
             <div className="p-4 border rounded-lg bg-background">
               <h3 className="font-semibold text-lg mb-2">Usage Overview</h3>
               <div className="flex items-end justify-between">
                 <p className="text-muted-foreground">You've used <span className="font-bold text-foreground">{userPlan.rows_used.toLocaleString()}</span> of your <span className="font-bold text-foreground">{userPlan.rows_limit.toLocaleString()}</span> monthly rows.</p>
-                {!isPremium && (
-                  <Button asChild variant="link" size="sm" className="text-accent h-auto p-0">
-                    <Link href="/#pricing">
-                      Upgrade Now <Zap className="ml-1" />
-                    </Link>
-                  </Button>
-                )}
               </div>
               <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
                 <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(userPlan.rows_used / userPlan.rows_limit) * 100}%` }}></div>
@@ -76,9 +67,7 @@ async function App() {
             </div>
           )}
 
-          {/* Feature Access */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Free Feature */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Basic Cleaning</CardTitle>
@@ -88,7 +77,6 @@ async function App() {
                 </CardContent>
               </Card>
 
-              {/* Premium Feature */}
               <Card className={!isPremium ? 'bg-secondary/50 border-dashed' : ''}>
                  <CardHeader>
                    <CardTitle className="flex items-center gap-2">
@@ -97,18 +85,9 @@ async function App() {
                  </CardHeader>
                  <CardContent>
                    <p className="text-muted-foreground">
-                     {isPremium ? "Unlock AI to automatically suggest the best cleaning strategies." : "Upgrade to unlock AI suggestions."}
+                     {isPremium ? "Unlock AI to automatically suggest the best cleaning strategies." : "Upgrade to Pro to unlock AI suggestions."}
                     </p>
                  </CardContent>
-                 {!isPremium && (
-                    <CardFooter>
-                       <Button asChild className="w-full">
-                         <Link href="/#pricing">
-                           Upgrade to Pro <Zap className="ml-2" />
-                         </Link>
-                       </Button>
-                    </CardFooter>
-                  )}
               </Card>
           </div>
 

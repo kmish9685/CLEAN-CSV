@@ -1,7 +1,6 @@
 import type {Metadata} from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
-import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'CleanCSV | Clean Your CSV Files in Seconds',
@@ -24,19 +23,6 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
         <Toaster />
-        <Script src="https://cdn.paddle.com/paddle/paddle.js" />
-        <Script
-          id="paddle-setup"
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window.Paddle !== 'undefined') {
-                window.Paddle.Setup({
-                  token: 'live_b7c260dd6f1a3403c97dda234b3'
-                });
-              }
-            `,
-          }}
-        />
       </body>
     </html>
   );

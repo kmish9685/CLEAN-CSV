@@ -4,16 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-import { useToast } from "@/hooks/use-toast";
-
-declare global {
-  interface Window {
-    Paddle: any;
-  }
-}
+import Link from 'next/link';
 
 const pricingTiers = [
   {
@@ -29,7 +20,6 @@ const pricingTiers = [
     ],
     cta: "Start for Free",
     isPopular: false,
-    price_id: null,
   },
   {
     name: "Pro",
@@ -43,9 +33,8 @@ const pricingTiers = [
       "Priority processing",
       "Email support"
     ],
-    cta: "Upgrade to Pro",
+    cta: "Get Started",
     isPopular: true,
-    price_id: "pri_01k1sqj31tms8d6fpjbyzwntzh",
   },
   {
     name: "Business",
@@ -59,71 +48,12 @@ const pricingTiers = [
       "Custom template creation",
       "Phone support"
     ],
-    cta: "Upgrade to Business",
+    cta: "Get Started",
     isPopular: false,
-    price_id: "pri_01k1sqjzq9mzcf2308p78wxgyj",
   }
 ];
 
 const Pricing = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const supabase = createClient();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    getUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [supabase.auth]);
-
-  const handleCheckout = (tier: typeof pricingTiers[0]) => {
-    if (!tier.price_id) {
-      const toolElement = document.getElementById('tool');
-      if (toolElement) {
-        toolElement.scrollIntoView({ behavior: 'smooth' });
-      }
-      return;
-    }
-    if (!user) {
-      toast({
-        title: "Please log in",
-        description: "You need to be logged in to upgrade your plan.",
-        variant: "destructive",
-      });
-      sessionStorage.setItem('upgrade_redirect', 'true'); // simple flag
-      window.location.href = "/login";
-      return;
-    }
-
-    if (window.Paddle) {
-       window.Paddle.Checkout.open({
-         items: [{ priceId: tier.price_id, quantity: 1 }],
-         customer: {
-            email: user.email,
-         },
-         customData: {
-            user_id: user.id,
-         }
-       });
-    } else {
-        toast({
-            title: "Error",
-            description: "Paddle checkout is not available. Please try again later.",
-            variant: "destructive",
-        });
-    }
-  };
-
   return (
     <section id="pricing" className="bg-secondary py-20 sm:py-24">
       <div className="container mx-auto max-w-7xl px-4">
@@ -153,13 +83,9 @@ const Pricing = () => {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button 
-                  className="w-full" 
-                  variant={tier.isPopular ? "default" : "outline"}
-                  onClick={() => handleCheckout(tier)}
-                >
-                  {tier.cta}
-                </Button>
+                 <Button className="w-full" variant={tier.isPopular ? "default" : "outline"} asChild>
+                    <Link href="#tool">{tier.cta}</Link>
+                 </Button>
               </CardFooter>
             </Card>
           ))}
