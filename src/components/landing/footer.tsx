@@ -20,7 +20,7 @@ const Footer = () => {
             {year ? `© ${year} CleanCSV. All rights reserved.` : `© CleanCSV. All rights reserved.`}
             </p>
             <div className="flex gap-4">
-                <Link href="https://kickvibe.site/terms-and-condition" className="hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">
+                <Link href="/terms" className="hover:text-primary transition-colors">
                     Terms & Conditions
                 </Link>
             </div>
