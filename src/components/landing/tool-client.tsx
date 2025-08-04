@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UploadCloud, File as FileIcon, X, BrainCircuit, Sparkles, Loader2, Download, Wand2, RefreshCw, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import OnboardingTour from "../OnboardingTour";
+import { useTheme } from "next-themes";
 
 type CleaningStrategy = {
   id: string;
@@ -259,7 +260,7 @@ export default function ToolClient() {
 
   return (
     <section id="tool" className="container mx-auto max-w-7xl px-4 py-20 sm:py-24">
-      <OnboardingTour />
+      {user && <OnboardingTour />}
       <div className="text-center mb-12">
         <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">The Cleaning Tool</h2>
         <p className="mt-4 text-lg text-muted-foreground">Upload your file and see the magic happen.</p>

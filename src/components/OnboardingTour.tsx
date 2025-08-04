@@ -6,11 +6,16 @@ import { useTheme } from "next-themes";
 
 export default function OnboardingTour() {
   const [run, setRun] = useState(false);
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   // Start the tour automatically on component mount for demonstration
   useEffect(() => {
-    setRun(true);
+    // In a real app, you'd check a user property from Supabase
+    // to see if they've completed the tour before setting run to true.
+    const hasCompletedTour = localStorage.getItem('onboarding_complete');
+    if (!hasCompletedTour) {
+      setRun(true);
+    }
   }, []);
 
   const steps: Step[] = [
@@ -43,18 +48,18 @@ export default function OnboardingTour() {
       styles={{
         options: {
           zIndex: 10000,
-          primaryColor: '#29ABE2',
-          // Adapt tooltip colors to the current theme
-          arrowColor: theme === 'dark' ? '#333' : '#fff',
-          backgroundColor: theme === 'dark' ? '#333' : '#fff',
-          textColor: theme === 'dark' ? '#fff' : '#333',
+          primaryColor: 'hsl(var(--primary))',
+          arrowColor: resolvedTheme === 'dark' ? '#333' : '#fff',
+          backgroundColor: resolvedTheme === 'dark' ? '#333' : '#fff',
+          textColor: resolvedTheme === 'dark' ? '#fff' : '#333',
         },
       }}
-      // This callback allows you to handle tour events, e.g. hiding it on finish/skip
       callback={({ status }) => {
         const finishedStatuses: string[] = ['finished', 'skipped'];
         if (finishedStatuses.includes(status)) {
           setRun(false);
+          // Mark tour as complete in local storage
+          localStorage.setItem('onboarding_complete', 'true');
         }
       }}
     />
