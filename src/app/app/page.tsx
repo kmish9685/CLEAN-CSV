@@ -18,19 +18,6 @@ async function App() {
     return redirect('/login');
   }
 
-  const { data: userPlan, error } = await supabase
-    .from('users_extended')
-    .select('plan, rows_used, rows_limit')
-    .eq('user_id', user.id)
-    .single();
-
-  if (error && error.code !== 'PGRST116') { // Ignore error when no rows are found
-    console.error('Error fetching user plan:', error);
-  }
-  
-  const planName = userPlan?.plan || 'free';
-  const isPremium = planName !== 'free';
-
   const signOut = async () => {
     'use server';
     const cookieStore = cookies();
@@ -49,24 +36,12 @@ async function App() {
               Welcome back, {user.email || user.phone}.
             </CardDescription>
           </div>
-           <Badge variant={isPremium ? "default" : "secondary"} className="capitalize">
-             {planName} Plan
+           <Badge variant={"secondary"} className="capitalize">
+             Free Plan
            </Badge>
         </CardHeader>
         <CardContent className="space-y-6">
           
-          {userPlan && (
-            <div className="p-4 border rounded-lg bg-background">
-              <h3 className="font-semibold text-lg mb-2">Usage Overview</h3>
-              <div className="flex items-end justify-between">
-                <p className="text-muted-foreground">You've used <span className="font-bold text-foreground">{userPlan.rows_used.toLocaleString()}</span> of your <span className="font-bold text-foreground">{userPlan.rows_limit.toLocaleString()}</span> monthly rows.</p>
-              </div>
-              <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
-                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(userPlan.rows_used / userPlan.rows_limit) * 100}%` }}></div>
-              </div>
-            </div>
-          )}
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
@@ -77,15 +52,15 @@ async function App() {
                 </CardContent>
               </Card>
 
-              <Card className={!isPremium ? 'bg-secondary/50 border-dashed' : ''}>
+              <Card>
                  <CardHeader>
                    <CardTitle className="flex items-center gap-2">
-                     <Star className={isPremium ? "text-yellow-500" : "text-muted-foreground"} /> AI-Powered Suggestions
+                     <Star className={"text-muted-foreground"} /> AI-Powered Suggestions
                    </CardTitle>
                  </CardHeader>
                  <CardContent>
                    <p className="text-muted-foreground">
-                     {isPremium ? "Unlock AI to automatically suggest the best cleaning strategies." : "Upgrade to Pro to unlock AI suggestions."}
+                     Unlock AI to automatically suggest the best cleaning strategies.
                     </p>
                  </CardContent>
               </Card>

@@ -23,12 +23,6 @@ type CleaningStrategy = {
   description: string;
 };
 
-type UserPlan = {
-  plan: string;
-  rows_used: number;
-  rows_limit: number;
-};
-
 const prebuiltTemplates: CleaningStrategy[] = [
   { id: "phone_cleanup", label: "Phone Number Cleanup", description: "Formats US phone numbers to (XXX) XXX-XXXX." },
   { id: "date_standardization", label: "Date Standardization", description: "Converts dates to YYYY-MM-DD format." },
@@ -56,7 +50,6 @@ export default function ToolClient() {
   const { toast } = useToast();
   const supabase = createClient();
   const [user, setUser] = useState<any>(null);
-  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string>("");
   const [csvData, setCsvData] = useState<string[][]>([]);
@@ -67,55 +60,36 @@ export default function ToolClient() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const fetchUserPlan = useCallback(async (userId: string) => {
-    const { data: userExtended, error } = await supabase
-      .from('users_extended')
-      .select('plan, rows_used, rows_limit')
-      .eq('user_id', userId)
-      .single();
-    if (userExtended) {
-      setUserPlan(userExtended);
-    }
-    if (error) {
-        console.error("Error fetching user plan details: ", error);
-        toast({
-          title: "Could not load your plan",
-          description: "Your usage details could not be loaded. Please try refreshing.",
-          variant: "destructive"
-        })
-    }
-  }, [supabase, toast]);
-
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
-      if (user) {
-        fetchUserPlan(user.id);
-      }
     };
     getUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user;
       setUser(currentUser);
-      if (currentUser) {
-        fetchUserPlan(currentUser.id);
-      } else {
-        setUserPlan(null);
-      }
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
 
-  }, [supabase, fetchUserPlan]);
+  }, [supabase]);
 
   const previewData = useMemo(() => csvData.slice(0, 5), [csvData]);
   const processedPreviewData = useMemo(() => processedData ? processedData.slice(0, 5) : [], [processedData]);
 
   const fetchAiSuggestions = useCallback(async (content: string) => {
+    if (!user) {
+        toast({
+            variant: "destructive",
+            title: "Please log in",
+            description: "Log in to use AI-powered suggestions."
+        })
+        return;
+    }
     setIsLoadingAi(true);
     try {
       const csvSample = content.split('\n').slice(0, 10).join('\n');
@@ -131,17 +105,9 @@ export default function ToolClient() {
     } finally {
       setIsLoadingAi(false);
     }
-  }, [toast]);
+  }, [toast, user]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Please log in",
-        description: "You need to be logged in to upload files.",
-      });
-      return;
-    }
     const uploadedFile = acceptedFiles[0];
     if (uploadedFile) {
       if (uploadedFile.size > 10 * 1024 * 1024) { // 10MB limit
@@ -163,7 +129,7 @@ export default function ToolClient() {
       };
       reader.readAsText(uploadedFile);
     }
-  }, [toast, fetchAiSuggestions, user]);
+  }, [toast, fetchAiSuggestions]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'text/csv': ['.csv'] }, multiple: false });
 
@@ -232,21 +198,7 @@ export default function ToolClient() {
       });
       return;
     }
-    if (!user || !userPlan) {
-      toast({ variant: "destructive", title: "Authentication Error", description: "Could not verify user details." });
-      return;
-    }
-
-    const newRows = csvData.length;
-    if (userPlan.rows_used + newRows > userPlan.rows_limit) {
-      toast({
-        variant: "destructive",
-        title: "Usage Limit Reached",
-        description: `You can only process ${userPlan.rows_limit - userPlan.rows_used} more rows. Please upgrade your plan for more.`,
-      });
-      return;
-    }
-
+    
     setIsProcessing(true);
     setProgress(0);
     const interval = setInterval(() => {
@@ -261,18 +213,6 @@ export default function ToolClient() {
       const transformedData = applyTransformations(csvData);
       setProcessedData(transformedData);
       
-      const { error } = await supabase
-        .from('users_extended')
-        .update({ rows_used: userPlan.rows_used + newRows })
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error("Error updating usage:", error);
-        toast({ variant: "destructive", title: "Error", description: "Failed to update your usage data." });
-      } else {
-        setUserPlan(prev => prev ? { ...prev, rows_used: prev.rows_used + newRows } : null);
-      }
-
       clearInterval(interval);
       setProgress(100);
       setIsProcessing(false);
@@ -329,22 +269,9 @@ export default function ToolClient() {
             <div {...getRootProps()} className={`flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors ${isDragActive ? 'border-primary bg-primary/10' : ''}`}>
               <input {...getInputProps()} />
               <UploadCloud className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="font-semibold">{user ? "Drag & drop a CSV file here, or click to select a file" : "Please log in to use the tool"}</p>
+              <p className="font-semibold">Drag & drop a CSV file here, or click to select a file</p>
               <p className="text-sm text-muted-foreground mt-2">Up to 10MB free</p>
             </div>
-             {user && userPlan && (
-                <div className="p-4 border-t text-center text-sm text-muted-foreground">
-                  Your plan: <span className="font-semibold text-primary capitalize">{userPlan.plan}</span>. 
-                  Usage: <span className="font-semibold">{userPlan.rows_used.toLocaleString()} / {userPlan.rows_limit.toLocaleString()} rows</span> used.
-                  {userPlan.plan === 'free' && (
-                     <Button asChild variant="link" className="p-1 h-auto text-accent">
-                        <a href="#pricing">
-                          Upgrade to Pro <Zap className="ml-1 h-4 w-4" />
-                        </a>
-                     </Button>
-                  )}
-                </div>
-              )}
           </CardContent>
         ) : (
           <div>
@@ -391,8 +318,10 @@ export default function ToolClient() {
                             <Label htmlFor={item}>{item}</Label>
                           </div>
                         ))
-                      ) : (
+                      ) : user ? (
                         <p className="text-sm text-muted-foreground">No specific suggestions found.</p>
+                      ) : (
+                         <p className="text-sm text-muted-foreground">Log in to get AI suggestions.</p>
                       )}
                     </div>
                   </div>
