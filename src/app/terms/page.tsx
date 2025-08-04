@@ -1,9 +1,19 @@
 
+"use client";
+
+import { useState, useEffect } from 'react';
+
 export default function TermsPage() {
+  const [lastUpdated, setLastUpdated] = useState('');
+
+  useEffect(() => {
+    setLastUpdated(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+  }, []);
+
   return (
     <main className="p-8 max-w-3xl mx-auto prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl 2xl:prose-2xl dark:prose-invert">
       <h1 className="text-3xl font-bold mb-6">Terms & Conditions</h1>
-      <p className="text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      {lastUpdated && <p className="text-muted-foreground">Last updated: {lastUpdated}</p>}
 
       <p className="mt-4">
         Welcome to CleanCSV! These terms and conditions outline the rules and regulations for the use of our website and services, located at this website.
