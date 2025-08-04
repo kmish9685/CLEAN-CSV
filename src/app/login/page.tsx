@@ -10,7 +10,7 @@ import { login, signup, signInWithGoogle } from "./actions";
 import { useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Chrome, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import PhoneForm from "./phone-form";
 import { useFormStatus } from "react-dom";
@@ -25,16 +25,56 @@ function SubmitButton({ children, ...props }: React.ComponentProps<typeof Button
   );
 }
 
-export default function LoginPage() {
+function LoginMessages() {
+    const searchParams = useSearchParams();
+    const message = searchParams.get('message');
+    const messageType = searchParams.get('type');
+
+    if (!message) return null;
+
+    if (messageType === 'login-error') {
+        return (
+            <Alert variant="destructive">
+                <AlertTitle>Login Failed</AlertTitle>
+                <AlertDescription>{message}</AlertDescription>
+            </Alert>
+        )
+    }
+
+    if (messageType === 'success') {
+        return (
+            <Alert>
+                <AlertTitle>Success!</AlertTitle>
+                <AlertDescription>{message}</AlertDescription>
+            </Alert>
+        )
+    }
+    
+    return null;
+}
+
+function SignupMessages() {
+    const searchParams = useSearchParams();
+    const message = searchParams.get('message');
+    const messageType = searchParams.get('type');
+
+    if (message && messageType === 'signup-error') {
+      return (
+        <Alert variant="destructive">
+          <AlertTitle>Signup Failed</AlertTitle>
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      )
+    }
+    return null;
+}
+
+function LoginPageContent() {
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
   }, []);
   
-  const searchParams = useSearchParams();
-  const message = searchParams.get('message');
-  const messageType = searchParams.get('type');
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-secondary">
       <Tabs defaultValue="login" className="w-full max-w-sm mx-4">
@@ -84,18 +124,7 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <form action={login} className="space-y-4">
-                     {message && messageType === 'login-error' && (
-                        <Alert variant="destructive">
-                            <AlertTitle>Login Failed</AlertTitle>
-                            <AlertDescription>{message}</AlertDescription>
-                        </Alert>
-                     )}
-                     {message && messageType === 'success' && (
-                        <Alert>
-                            <AlertTitle>Success!</AlertTitle>
-                            <AlertDescription>{message}</AlertDescription>
-                        </Alert>
-                     )}
+                     <LoginMessages />
                     <div className="grid gap-2">
                       <Label htmlFor="email">Email</Label>
                       <Input id="email" name="email" type="email" placeholder="m@example.com" required />
@@ -155,12 +184,7 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <form action={signup} className="space-y-4">
-                    {message && messageType === 'signup-error' && (
-                      <Alert variant="destructive">
-                        <AlertTitle>Signup Failed</AlertTitle>
-                        <AlertDescription>{message}</AlertDescription>
-                      </Alert>
-                    )}
+                    <SignupMessages />
                     <div className="grid gap-2">
                       <Label htmlFor="email-signup">Email</Label>
                       <Input id="email-signup" name="email" type="email" placeholder="m@example.com" required />
@@ -180,3 +204,8 @@ export default function LoginPage() {
     </div>
   );
 }
+
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>
