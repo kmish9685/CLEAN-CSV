@@ -61,7 +61,7 @@ export async function signup(formData: FormData) {
 
 
   revalidatePath('/', 'layout');
-  return redirect('/login?message=Check email to continue sign in process&type=success');
+  return redirect(`/login?message=Verification link sent to ${email}. Please check your inbox.&type=success`);
 }
 
 
