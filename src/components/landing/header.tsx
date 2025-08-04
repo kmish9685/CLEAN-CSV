@@ -20,7 +20,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
-import { CreditCard, LogOut, User as UserIcon } from "lucide-react";
+import { CreditCard, LogOut, User as UserIcon, HelpCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 const UserMenu = ({ user }: { user: User }) => {
@@ -106,8 +106,10 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-7xl items-center">
         <Logo />
-        <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center space-x-2">
+        <nav className="flex flex-1 items-center justify-end space-x-4">
+            <Button variant="ghost" asChild>
+                <Link href="/#solution"><HelpCircle className="mr-2 h-4 w-4"/> How It Works</Link>
+            </Button>
             {loading ? (
               <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
             ) : user ? (
@@ -122,8 +124,7 @@ const Header = () => {
                 </Button>
               </>
             )}
-          </nav>
-        </div>
+        </nav>
       </div>
     </header>
   );
