@@ -9,6 +9,12 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 
+declare global {
+  interface Window {
+    Paddle: any;
+  }
+}
+
 const pricingTiers = [
   {
     name: "Free",
@@ -23,7 +29,7 @@ const pricingTiers = [
     ],
     cta: "Start for Free",
     isPopular: false,
-    checkoutUrl: null,
+    price_id: null,
   },
   {
     name: "Pro",
@@ -39,8 +45,7 @@ const pricingTiers = [
     ],
     cta: "Upgrade to Pro",
     isPopular: true,
-    // IMPORTANT: Replace with your actual Lemon Squeezy Pro plan variant URL
-    checkoutUrl: "https://<YOUR_STORE>.lemonsqueezy.com/buy/<YOUR-PRO-VARIANT-ID>",
+    price_id: "pri_01k1sqj31tms8d6fpjbyzwntzh",
   },
   {
     name: "Business",
@@ -56,8 +61,7 @@ const pricingTiers = [
     ],
     cta: "Upgrade to Business",
     isPopular: false,
-    // IMPORTANT: Replace with your actual Lemon Squeezy Business plan variant URL
-    checkoutUrl: "https://<YOUR_STORE>.lemonsqueezy.com/buy/<YOUR-BUSINESS-VARIANT-ID>",
+    price_id: "pri_01k1sqjzq9mzcf2308p78wxgyj",
   }
 ];
 
@@ -83,7 +87,7 @@ const Pricing = () => {
   }, [supabase.auth]);
 
   const handleCheckout = (tier: typeof pricingTiers[0]) => {
-    if (!tier.checkoutUrl) {
+    if (!tier.price_id) {
       const toolElement = document.getElementById('tool');
       if (toolElement) {
         toolElement.scrollIntoView({ behavior: 'smooth' });
@@ -96,17 +100,28 @@ const Pricing = () => {
         description: "You need to be logged in to upgrade your plan.",
         variant: "destructive",
       });
-      // Save the intended destination and redirect to login
-      sessionStorage.setItem('upgrade_redirect', tier.checkoutUrl);
+      sessionStorage.setItem('upgrade_redirect', 'true'); // simple flag
       window.location.href = "/login";
       return;
     }
-    let url = tier.checkoutUrl;
-    // Add user details to the checkout URL
-    url += `?checkout[email]=${encodeURIComponent(user.email!)}&checkout[custom][user_id]=${user.id}`;
-    // Add redirect URL to bring user back to dashboard
-    url += `&checkout[redirect_url]=${window.location.origin}/app`;
-    window.open(url, '_blank');
+
+    if (window.Paddle) {
+       window.Paddle.Checkout.open({
+         items: [{ priceId: tier.price_id, quantity: 1 }],
+         customer: {
+            email: user.email,
+         },
+         customData: {
+            user_id: user.id,
+         }
+       });
+    } else {
+        toast({
+            title: "Error",
+            description: "Paddle checkout is not available. Please try again later.",
+            variant: "destructive",
+        });
+    }
   };
 
   return (
@@ -148,9 +163,6 @@ const Pricing = () => {
               </CardFooter>
             </Card>
           ))}
-        </div>
-        <div className="text-center mt-8">
-            <p className="text-xs text-muted-foreground">Please replace checkout URLs in `src/components/landing/pricing.tsx` with your actual Lemon Squeezy details.</p>
         </div>
       </div>
     </section>
