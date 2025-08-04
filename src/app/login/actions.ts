@@ -55,16 +55,8 @@ export async function signup(formData: FormData) {
      return redirect(`/login?message=${encodeURIComponent("User with this email already exists.")}&type=signup-error`);
   }
 
-  // Manually send the verification email using Resend
-  if (data.properties?.verification_token) {
-    try {
-      await sendVerificationEmail(email, data.properties.verification_token);
-    } catch (sendError) {
-      console.error("Resend Error:", sendError);
-      // Optional: You might want to handle this case, e.g., by informing the user
-      // that the confirmation email could not be sent and to try signing up again later.
-      return redirect(`/login?message=${encodeURIComponent("Could not send confirmation email. Please try again.")}&type=signup-error`);
-    }
+   if (data.user) {
+    await sendVerificationEmail(email, data.user.id);
   }
 
 
