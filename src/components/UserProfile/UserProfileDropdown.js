@@ -26,8 +26,7 @@ const UserProfileDropdown = () => {
   };
 
   const handleHelpSupportClick = () => {
-    console.log("Help and Support clicked. Implement your help/support logic here.");
-    // Example: router.push('/help-support'); or open a modal
+    window.open('https://yourdomain.com/help', '_blank');
   };
 
   const handleBillingHistoryClick = () => {
@@ -85,7 +84,7 @@ const UserProfileDropdown = () => {
             leaveTo="transform opacity-0 scale-95"
           >
             <Menu.Items
-              className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+              className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-xl shadow-md hover:shadow-lg transition-all bg-white p-4 ring-1 ring-black ring-opacity-5 focus:outline-none"
               role="menu"
               aria-orientation="vertical"
               aria-labelledby="user-menu-button"

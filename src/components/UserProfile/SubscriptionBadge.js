@@ -8,11 +8,12 @@ const SubscriptionBadge = ({ subscription }) => {
   const { plan_name, status, current_period_end } = subscription;
 
   const getPlanBadgeClass = (plan) => {
+    const baseClasses = "text-xs font-semibold px-2 py-1 rounded-full";
     switch(plan?.toLowerCase()) {
-      case 'free': return 'bg-gray-200 text-gray-800';
-      case 'pro': return 'bg-blue-500 text-white';
-      case 'premium': return 'bg-purple-600 text-white';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'free': return `${baseClasses} bg-gray-100 text-gray-600`;
+      case 'pro': return `${baseClasses} bg-green-100 text-green-800`;
+      case 'premium': return `${baseClasses} bg-purple-600 text-white`;
+      default: return `${baseClasses} bg-gray-100 text-gray-600`;
     }
   };
 
@@ -26,7 +27,7 @@ const SubscriptionBadge = ({ subscription }) => {
   }
 
   return (
-    <span className={`px-2 py-1 rounded text-sm ${getPlanBadgeClass(plan_name)}`}>
+    <span className={`${getPlanBadgeClass(plan_name)}`}>
       <span className="font-medium">{plan_name || 'N/A'}</span>
       {status && (
         <span className={`ml-1 text-xs ${getStatusTextClass(status)}`}>
