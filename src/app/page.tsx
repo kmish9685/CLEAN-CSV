@@ -2,7 +2,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import type { User } from "@supabase/supabase-js";
 import Header from "@/components/landing/header";
 import SocialProof from "@/components/landing/social-proof";
@@ -12,7 +12,9 @@ import Pricing from "@/components/landing/pricing";
 import Testimonials from "@/components/landing/testimonials";
 import Faq from "@/components/landing/faq";
 import Footer from "@/components/landing/footer";
+import HowItWorks from "@/components/landing/how-it-works";
 import { Skeleton } from "@/components/ui/skeleton";
+import Dashboard from "@/components/Dashboard/Dashboard"; // Assuming Dashboard component exists
 
 export default function Home() {
   const supabase = createClient();
@@ -37,27 +39,30 @@ export default function Home() {
     };
   }, [supabase]);
 
-
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1">
-        {loading ? (
-           <div className="container mx-auto max-w-7xl px-4 py-20 sm:py-24">
-             <Skeleton className="h-[400px] w-full" />
-           </div>
-        ) : user ? (
-          <Tool />
-        ) : (
-          <>
-            <Tool />
-            <SocialProof />
-            <Solution />
-            <Pricing />
-            <Testimonials />
-            <Faq />
-          </>
-        )}
+        <Suspense fallback={
+          <div className="container mx-auto max-w-7xl px-4 py-20 sm:py-24">
+            <Skeleton className="h-[400px] w-full" />
+          </div>
+        }>
+          {user ? (
+            <Dashboard /> // Render Dashboard component if user is logged in
+          ) : (
+            <>
+              <Tool /> {/* This could be part of your Landing Page */}
+              <SocialProof />
+              <HowItWorks />
+              <Solution />
+              <Pricing />
+              <Testimonials />
+              <Faq />
+              {/* Add other landing page components here */}
+            </>
+          )}
+        </Suspense>
       </main>
       <Footer />
     </div>

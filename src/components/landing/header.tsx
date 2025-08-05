@@ -109,9 +109,9 @@ const Header = () => {
       <div className="container flex h-16 max-w-7xl items-center">
         <Logo />
         <nav className="flex flex-1 items-center justify-end space-x-4">
-            <Button variant="ghost" asChild>
-                <Link href="/#solution"><HelpCircle className="mr-2 h-4 w-4"/> How It Works</Link>
-            </Button>
+ <Link href="#how-it-works">
+ <Button variant="ghost"><HelpCircle className="mr-2 h-4 w-4"/> How It Works</Button>
+ </Link>
             {loading ? (
               <Skeleton className="h-8 w-8 rounded-full" />
             ) : user ? (
