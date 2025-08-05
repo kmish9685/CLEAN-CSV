@@ -1,6 +1,7 @@
 
 import type {Metadata} from 'next';
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster"; // Your existing Toaster
+import { Toaster as ReactHotToaster } from 'react-hot-toast'; // Toaster from react-hot-toast
 import './globals.css';
 import { ThemeProvider } from "next-themes";
 
@@ -25,7 +26,8 @@ export default function RootLayout({
       <body className="font-body antialiased" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
-          <Toaster />
+          <Toaster /> {/* Your existing Toaster */} 
+          <ReactHotToaster position="top-right" /> {/* Toaster from react-hot-toast */} 
         </ThemeProvider>
       </body>
     </html>
