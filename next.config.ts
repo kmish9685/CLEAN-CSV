@@ -31,17 +31,6 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  webpack: (config, { isServer }) => {
-    // Add a rule to handle .hbs files using raw-loader
-    config.module.rules.push({
-      test: /\.hbs$/,
-      use: 'raw-loader',
-    });
-
-    // Important: return the modified config
-    return config;
-  },
-
 };
 
 export default nextConfig;
