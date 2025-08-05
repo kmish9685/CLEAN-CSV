@@ -1,15 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../firebase/config'; // Assuming firebase config is in this path
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-} from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase/config'; // Assuming Firestore db is in this path
+import { supabase } from '../lib/supabase'; // Import Supabase client
 
 const AuthContext = createContext();
+
+// Define your user object structure here if needed for clarity or type checking
 
 export const useAuth = () => {
   return useContext(AuthContext);
@@ -17,41 +11,108 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      if (user) {
-        try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            setUserData(userDocSnap.data());
-          } else {
-            setUserData(null); // User document doesn't exist
-          }
-        } catch (err) {
-          setError('Failed to fetch user data.');
-          console.error('Error fetching user data:', err);
-        }
+    const fetchUserAndData = async () => {
+      setLoading(true);
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError) {
+        console.error('Error fetching user:', authError.message);
+        setError(authError.message);
+        setCurrentUser(null);
+        setProfile(null);
+        setSubscription(null);
       } else {
-        setUserData(null);
+        setCurrentUser(user);
+        if (user) {
+          // Fetch profile and subscription data
+          await fetchUserProfile(user.id);
+          await fetchSubscription(user.id);
+        } else {
+          setProfile(null);
+          setSubscription(null);
+        }
       }
       setLoading(false);
-    });
+    };
 
-    return unsubscribe;
+    fetchUserAndData();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          setCurrentUser(session.user);
+          await fetchUserProfile(session.user.id);
+          await fetchSubscription(session.user.id);
+        } else {
+          setCurrentUser(null);
+          setProfile(null);
+          setSubscription(null);
+        }
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  const signup = async (email, password) => {
+  const fetchUserProfile = async (userId) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching profile:', error.message);
+      setError(error.message);
+      setProfile(null);
+    } else {
+      setProfile(data);
+    }
+  };
+
+  const fetchSubscription = async (userId) => {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching subscription:', error.message);
+      setError(error.message);
+      setSubscription(null);
+    } else {
+      setSubscription(data);
+    }
+  };
+
+  const signup = async (email, password, metadata) => {
     setLoading(true);
     setError(null);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // Additional logic to create user document in Firestore if needed
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: metadata, // Include metadata here if you want to store it with the auth user
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      // Fetch the newly created profile and potentially subscription data
+      if (user) {
+        await fetchUserProfile(user.id);
+        await fetchSubscription(user.id);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Signup error:', err);
@@ -65,8 +126,11 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (signInError) throw signInError;
+      // authStateChange listener will handle setting user and fetching data
+    }  catch (err) {
       setError(err.message);
       console.error('Login error:', err);
       throw err; // Re-throw to allow components to catch
@@ -79,8 +143,11 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      await signOut(auth);
-    } catch (err) {
+      const { error: signOutError } = await supabase.auth.signOut();
+
+      if (signOutError) throw signOutError;
+      // authStateChange listener will handle clearing user and data
+    }  catch (err) {
       setError(err.message);
       console.error('Logout error:', err);
       throw err; // Re-throw to allow components to catch
@@ -89,11 +156,47 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUserProfile = async (profileData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', currentUser.id);
+
+      if (error) throw error;
+
+      await fetchUserProfile(currentUser.id); // Refresh profile data
+      return data;
+    } catch (err) {
+      setError(err.message);
+      console.error('Error updating profile:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const uploadAvatar = async (file, userId) => {
+    const { data, error } = await supabase
+      .storage
+      .from('avatars') // make sure you created this bucket in Supabase Storage
+      .upload(`${userId}/avatar.png`, file, { upsert: true });
+
+    if (error) {
+      console.error("Upload error:", error);
+      return null;
+    }
+
+    const { publicUrl } = supabase.storage.from('avatars').getPublicUrl(`${userId}/avatar.png`);
+    return publicUrl;
+  };
+
   const value = {
     currentUser,
-    userData,
-    loading,
-    error,
+    profile,
+    subscription,
     signup,
     login,
     logout,
@@ -101,7 +204,10 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {/* Optionally show a loading indicator or null while authenticating */}
+      {/* {loading ? <LoadingSpinner /> : children} */}
+      {/* For now, just render children */}
+      {children}
     </AuthContext.Provider>
   );
 };
