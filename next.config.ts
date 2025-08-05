@@ -31,11 +31,6 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  // Add the allowedDevOrigins property to the devServer config
-  // to resolve the cross-origin request warning in development.
-  devServer: {
-    allowedDevOrigins: ["https://*.cloudworkstations.dev"],
-  }
 };
 
 export default nextConfig;
