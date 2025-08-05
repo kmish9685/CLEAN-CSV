@@ -14,7 +14,7 @@ import Faq from "@/components/landing/faq";
 import Footer from "@/components/landing/footer";
 import HowItWorks from "@/components/landing/how-it-works";
 import { Skeleton } from "@/components/ui/skeleton";
-import Dashboard from "@/components/Dashboard/Dashboard"; // Assuming Dashboard component exists
+import Dashboard from "@/components/Dashboard/Dashboard.tsx";
 
 export default function Home() {
   const supabase = createClient();
@@ -49,17 +49,16 @@ export default function Home() {
           </div>
         }>
           {user ? (
-            <Dashboard /> // Render Dashboard component if user is logged in
+            <Dashboard />
           ) : (
             <>
-              <Tool /> {/* This could be part of your Landing Page */}
+              <Tool />
               <SocialProof />
               <HowItWorks />
               <Solution />
               <Pricing />
               <Testimonials />
               <Faq />
-              {/* Add other landing page components here */}
             </>
           )}
         </Suspense>
