@@ -5,7 +5,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { suggestCleaningStrategies } from "@/ai/flows/suggest-cleaning-strategies";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -23,8 +23,12 @@ import {
   Loader2,
   Download,
   Wand2,
+  Lock,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
+import Link from "next/link";
+
 
 type CleaningStrategy = {
   id: string;
@@ -69,22 +73,51 @@ export default function ToolClient() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // Trial state
+  const [trialCount, setTrialCount] = useState(0);
+  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
+  const MAX_TRIALS = 2;
+
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+
+      if (!user) {
+        const storedTrialCount = parseInt(localStorage.getItem('cleancsv_trial_count') || '0', 10);
+        setTrialCount(storedTrialCount);
+        if (storedTrialCount >= MAX_TRIALS) {
+            setIsTrialModalOpen(true);
+        }
+      }
     };
     getUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user;
       setUser(currentUser);
+      if (currentUser) {
+        // User logged in, reset local trial count if it exists
+        localStorage.removeItem('cleancsv_trial_count');
+      }
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, [supabase]);
+
+  const incrementTrialCount = () => {
+    if (!user) {
+        const newCount = trialCount + 1;
+        setTrialCount(newCount);
+        localStorage.setItem('cleancsv_trial_count', newCount.toString());
+        if (newCount >= MAX_TRIALS) {
+            setTimeout(() => setIsTrialModalOpen(true), 1000);
+        }
+    }
+  };
+
 
   const previewData = useMemo(() => csvData.slice(0, 5), [csvData]);
   const processedPreviewData = useMemo(() => processedData ? processedData.slice(0, 5) : [], [processedData]);
@@ -117,6 +150,11 @@ export default function ToolClient() {
   }, [toast, user]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (!user && trialCount >= MAX_TRIALS) {
+        setIsTrialModalOpen(true);
+        return;
+    }
+
     const uploadedFile = acceptedFiles[0];
     if (uploadedFile) {
       if (uploadedFile.size > 10 * 1024 * 1024) {
@@ -134,11 +172,11 @@ export default function ToolClient() {
         setFileContent(text);
         const parsedData = parseCsv(text);
         setCsvData(parsedData);
-        fetchAiSuggestions(text);
+        if(user) fetchAiSuggestions(text);
       };
       reader.readAsText(uploadedFile);
     }
-  }, [toast, fetchAiSuggestions]);
+  }, [toast, fetchAiSuggestions, user, trialCount]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'text/csv': ['.csv'] }, multiple: false });
 
@@ -198,6 +236,11 @@ export default function ToolClient() {
   };
 
   const processFile = async () => {
+    if (!user && trialCount >= MAX_TRIALS) {
+        setIsTrialModalOpen(true);
+        return;
+    }
+    
     if (selectedStrategies.size === 0) {
       toast({
         variant: "destructive",
@@ -223,6 +266,7 @@ export default function ToolClient() {
         title: "Processing Complete!",
         description: "Your file has been successfully cleaned.",
       });
+      incrementTrialCount();
     }, 2000);
   };
 
@@ -261,14 +305,36 @@ export default function ToolClient() {
 
   return (
     <section id="tool" className="container mx-auto max-w-7xl px-4 py-20 sm:py-24">
-      {/* Rest of your JSX remains unchanged */}
+       <AlertDialog open={isTrialModalOpen} onOpenChange={setIsTrialModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>You're loving our tool! 🎉</AlertDialogTitle>
+            <AlertDialogDescription>
+              You've used your {MAX_TRIALS} free trials. Create a free account to continue cleaning files, or log in to your existing account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button asChild variant="outline">
+                <Link href="/login">Login</Link>
+            </Button>
+            <Button asChild>
+                <Link href="/login">Create Free Account</Link>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Upload & Options */}
         <div className="lg:col-span-1 space-y-6">
           <Card id="upload-step">
             <CardHeader>
               <CardTitle>1. Upload Your File</CardTitle>
-              <CardDescription>Drag & drop or select a CSV file.</CardDescription>
+               {!user && (
+                    <CardDescription>
+                        You have {Math.max(0, MAX_TRIALS - trialCount)}/{MAX_TRIALS} free trials remaining.
+                    </CardDescription>
+                )}
             </CardHeader>
             <CardContent>
               <div
@@ -308,53 +374,64 @@ export default function ToolClient() {
               <CardContent>
                 <Tabs defaultValue="ai">
                   <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="ai"><Sparkles className="w-4 h-4 mr-2" />AI</TabsTrigger>
+                    <TabsTrigger value="ai" disabled={!user}><Sparkles className="w-4 h-4 mr-2" />AI</TabsTrigger>
                     <TabsTrigger value="templates">Templates</TabsTrigger>
                     <TabsTrigger value="custom">Custom</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="ai" className="mt-4 space-y-4">
-                     <div className="flex items-center justify-between">
-                        <Label htmlFor="ai-suggestions" className="flex items-center gap-2 font-semibold">
-                          <BrainCircuit className="w-5 h-5 text-primary" />
-                          AI Suggestions
-                        </Label>
-                        <Button variant="ghost" size="sm" onClick={() => fetchAiSuggestions(fileContent)} disabled={isLoadingAi}>
-                           {isLoadingAi ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                        </Button>
-                     </div>
-                      {isLoadingAi ? (
-                        <div className="space-y-2">
-                           <div className="flex items-center space-x-2">
-                              <Checkbox id="ai-suggestion-skeleton-1" disabled />
-                              <Label htmlFor="ai-suggestion-skeleton-1" className="w-full h-4 bg-muted rounded-md animate-pulse"></Label>
-                           </div>
-                           <div className="flex items-center space-x-2">
-                              <Checkbox id="ai-suggestion-skeleton-2" disabled />
-                              <Label htmlFor="ai-suggestion-skeleton-2" className="w-3/4 h-4 bg-muted rounded-md animate-pulse"></Label>
-                           </div>
+                    {!user && (
+                        <div className="text-center p-4 rounded-md bg-secondary/50">
+                            <BrainCircuit className="w-8 h-8 mx-auto text-muted-foreground" />
+                            <p className="mt-2 text-sm font-semibold">AI Suggestions</p>
+                            <p className="text-xs text-muted-foreground">Please <Link href="/login" className="underline text-primary">log in</Link> to use AI-powered cleaning suggestions.</p>
                         </div>
-                      ) : aiSuggestions.length > 0 ? (
-                        aiSuggestions.map((suggestion) => {
-                          const allOptions = [...prebuiltTemplates, ...customOptions];
-                          const matchedOption = allOptions.find(opt => opt.label === suggestion);
-                          return matchedOption ? (
-                            <div key={matchedOption.id} className="flex items-start space-x-2">
-                               <Checkbox
-                                id={matchedOption.id}
-                                checked={selectedStrategies.has(matchedOption.id)}
-                                onCheckedChange={(checked) => handleStrategyToggle(matchedOption.id, !!checked)}
-                              />
-                              <div className="grid gap-1.5 leading-none">
-                                <Label htmlFor={matchedOption.id}>{matchedOption.label}</Label>
-                                <p className="text-sm text-muted-foreground">{matchedOption.description}</p>
-                              </div>
+                    )}
+                     {user && (
+                        <>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="ai-suggestions" className="flex items-center gap-2 font-semibold">
+                            <BrainCircuit className="w-5 h-5 text-primary" />
+                            AI Suggestions
+                            </Label>
+                            <Button variant="ghost" size="sm" onClick={() => fetchAiSuggestions(fileContent)} disabled={isLoadingAi}>
+                            {isLoadingAi ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                            </Button>
+                        </div>
+                        {isLoadingAi ? (
+                            <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="ai-suggestion-skeleton-1" disabled />
+                                <Label htmlFor="ai-suggestion-skeleton-1" className="w-full h-4 bg-muted rounded-md animate-pulse"></Label>
                             </div>
-                          ) : null;
-                        })
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">No suggestions found. Try refreshing.</p>
-                      )}
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="ai-suggestion-skeleton-2" disabled />
+                                <Label htmlFor="ai-suggestion-skeleton-2" className="w-3/4 h-4 bg-muted rounded-md animate-pulse"></Label>
+                            </div>
+                            </div>
+                        ) : aiSuggestions.length > 0 ? (
+                            aiSuggestions.map((suggestion) => {
+                            const allOptions = [...prebuiltTemplates, ...customOptions];
+                            const matchedOption = allOptions.find(opt => opt.label === suggestion);
+                            return matchedOption ? (
+                                <div key={matchedOption.id} className="flex items-start space-x-2">
+                                <Checkbox
+                                    id={matchedOption.id}
+                                    checked={selectedStrategies.has(matchedOption.id)}
+                                    onCheckedChange={(checked) => handleStrategyToggle(matchedOption.id, !!checked)}
+                                />
+                                <div className="grid gap-1.5 leading-none">
+                                    <Label htmlFor={matchedOption.id}>{matchedOption.label}</Label>
+                                    <p className="text-sm text-muted-foreground">{matchedOption.description}</p>
+                                </div>
+                                </div>
+                            ) : null;
+                            })
+                        ) : (
+                            <p className="text-sm text-muted-foreground text-center py-4">No suggestions found. Try refreshing.</p>
+                        )}
+                        </>
+                     )}
                   </TabsContent>
 
                   <TabsContent value="templates" className="mt-4 space-y-4">

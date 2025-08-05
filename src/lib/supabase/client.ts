@@ -1,3 +1,4 @@
+
 import { createBrowserClient } from '@supabase/ssr';
 import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
@@ -70,12 +71,13 @@ export const auth = {
 
 // Generate or retrieve a unique session ID from localStorage for anonymous users
 export const getSessionId = (): string => {
-  let sessionId = localStorage.getItem('trial_session_id');
-  if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem('trial_session_id', sessionId);
-  }
-  return sessionId;
+    if (typeof window === 'undefined') return '';
+    let sessionId = localStorage.getItem('trial_session_id');
+    if (!sessionId) {
+        sessionId = crypto.randomUUID();
+        localStorage.setItem('trial_session_id', sessionId);
+    }
+    return sessionId;
 };
 
 // Initialize trial session in Supabase
@@ -97,7 +99,7 @@ export const getTrialUsage = async (sessionId: string): Promise<{ count: number 
     .eq('session_id', sessionId)
     .single();
 
-  if (error) {
+  if (error && error.code !== 'PGRST116') { // Ignore "No rows found" error, return 0 instead
     console.error('Error fetching trial usage:', error);
     return { count: null, error };
   }
@@ -105,27 +107,33 @@ export const getTrialUsage = async (sessionId: string): Promise<{ count: number 
   return { count: data ? data.usage_count : 0, error: null };
 };
 
+
 // Increment trial usage
 export const incrementTrialUsage = async (sessionId: string): Promise<{ data: any | null; error: any | null }> => {
-  const supabase = createClient(); // Get the Supabase client instance
-  // Increment usage_count by 1 for the given session_id
-  const { data, error } = await supabase
-    .from('trial_sessions')
-    .update({ usage_count: (await getTrialUsage(sessionId)).count! + 1 }) // Get current count and increment
-    .eq('session_id', sessionId)
-    .select();
+    const supabase = createClient();
+    const { count, error: fetchError } = await getTrialUsage(sessionId);
 
-  return { data, error };
+    if (fetchError) {
+        return { data: null, error: fetchError };
+    }
+
+    if (count === null) {
+        // Session doesn't exist, create it first
+        const { error: createError } = await initializeTrialSession(sessionId);
+        if (createError) {
+            return { data: null, error: createError };
+        }
+    }
+
+    const { data, error } = await supabase.rpc('increment_trial_usage', { p_session_id: sessionId });
+    
+    if (error) {
+        console.error('Error incrementing trial usage:', error);
+    }
+
+    return { data, error };
 };
 
-// Fetch all templates from the 'templates' table
-export const getTemplates = async (): Promise<{ data: any | null; error: any | null }> => {
-  const supabase = createClient(); // Get the Supabase client instance
-  const { data, error } = await supabase
-    .from('templates')
-    .select('*'); // Select all columns
-  return { data, error };
-};
 
 // Check if trial expired
 export const isTrialExpired = async (sessionId: string): Promise<boolean> => {
@@ -147,5 +155,14 @@ export const resetTrialAfterSignup = async (sessionId: string, userId: string): 
   // You could also update the user's profile to reflect they are no longer on trial
   // await supabase.from('profiles').update({ trial_used: true, trial_count: (await getTrialUsage(sessionId)).count }).eq('id', userId);
 
+  return { data, error };
+};
+
+// Fetch all templates from the 'templates' table
+export const getTemplates = async (): Promise<{ data: any | null; error: any | null }> => {
+  const supabase = createClient(); // Get the Supabase client instance
+  const { data, error } = await supabase
+    .from('templates')
+    .select('*'); // Select all columns
   return { data, error };
 };

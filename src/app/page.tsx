@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
@@ -47,11 +48,14 @@ export default function Home() {
             <Skeleton className="h-[400px] w-full" />
           </div>
         }>
-          {user ? (
-            <Dashboard />
-          ) : (
+          <Tool />
+          {loading ? (
+             <div className="container mx-auto max-w-7xl px-4 py-10">
+                <Skeleton className="h-24 w-full mb-8" />
+                <Skeleton className="h-64 w-full" />
+             </div>
+          ) : !user && (
             <>
-              <Tool />
               <SocialProof />
               <HowItWorks />
               <Solution />
@@ -60,6 +64,7 @@ export default function Home() {
               <Faq />
             </>
           )}
+           {user && <Dashboard />}
         </Suspense>
       </main>
       <Footer />
