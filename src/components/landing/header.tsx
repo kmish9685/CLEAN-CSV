@@ -5,24 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/landing/logo";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import type { User } from "@supabase/supabase-js";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Menu, Transition } from '@headlessui/react'
+import { ChevronDownIcon, CreditCardIcon, ArrowRightOnRectangleIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
-import { CreditCard, LogOut, User as UserIcon, HelpCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
+import HowItWorksModal from "./how-it-works-modal";
 
 const UserMenu = ({ user }: { user: User }) => {
   const supabase = createClient();
@@ -37,50 +32,76 @@ const UserMenu = ({ user }: { user: User }) => {
   }
 
   return (
-     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+    <Menu as="div" className="relative inline-block text-left">
+      <div>
+        <Menu.Button className="inline-flex w-full justify-center items-center gap-x-1.5 rounded-full text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
           <Avatar className="h-9 w-9">
             <AvatarImage src={`https://placehold.co/40x40.png`} alt={user.email || ""} data-ai-hint="person avatar" />
-            <AvatarFallback>{user.email ? getInitials(user.email) : <UserIcon />}</AvatarFallback>
+            <AvatarFallback>{user.email ? getInitials(user.email) : '?'}</AvatarFallback>
           </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">My Account</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-         <DropdownMenuItem className="cursor-pointer">
-            <div className="w-full flex justify-between items-center">
-                <span>Subscription</span>
-                <Badge variant="secondary">Free Plan</Badge>
+        </Menu.Button>
+      </div>
+
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-100"
+        enterFrom="transform opacity-0 scale-95"
+        enterTo="transform opacity-100 scale-100"
+        leave="transition ease-in duration-75"
+        leaveFrom="transform opacity-100 scale-100"
+        leaveTo="transform opacity-0 scale-95"
+      >
+        <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-card shadow-lg ring-1 ring-border ring-opacity-5 focus:outline-none">
+          <div className="py-1">
+             <div className="px-4 py-3">
+                <p className="text-sm font-medium leading-none text-card-foreground">My Account</p>
+                <p className="text-xs leading-none text-muted-foreground mt-1 truncate">
+                {user.email}
+                </p>
             </div>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" asChild>
-            <Link href="/#pricing">
-                <CreditCard className="mr-2 h-4 w-4" />
-                <span>Pricing</span>
-            </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={signOut} className="cursor-pointer">
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <Menu.Item>
+              {({ active }) => (
+                 <div className={`flex justify-between items-center px-4 py-2 text-sm ${active ? 'bg-secondary' : ''}`}>
+                    <span className="text-card-foreground">Subscription</span>
+                    <Badge variant="secondary">Free Plan</Badge>
+                </div>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({ active }) => (
+                <Link
+                  href="/#pricing"
+                  className={`group flex w-full items-center px-4 py-2 text-sm ${active ? 'bg-secondary text-card-foreground' : 'text-card-foreground'}`}
+                >
+                  <CreditCardIcon className="mr-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                  Pricing
+                </Link>
+              )}
+            </Menu.Item>
+            <div className="py-1">
+                 <Menu.Item>
+                    {({ active }) => (
+                        <button
+                        onClick={signOut}
+                        className={`group flex w-full items-center px-4 py-2 text-sm ${active ? 'bg-secondary text-card-foreground' : 'text-card-foreground'}`}
+                        >
+                        <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                        Sign out
+                        </button>
+                    )}
+                 </Menu.Item>
+            </div>
+          </div>
+        </Menu.Items>
+      </Transition>
+    </Menu>
   );
 };
 
 const Header = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -94,9 +115,6 @@ const Header = () => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      if(event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        // You can add a redirect or other logic here if needed
-      }
     });
 
     return () => {
@@ -105,30 +123,33 @@ const Header = () => {
   }, [supabase]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-7xl items-center">
-        <Logo />
-        <nav className="flex flex-1 items-center justify-end space-x-4">
- <Link href="#how-it-works">
- <Button variant="ghost"><HelpCircle className="mr-2 h-4 w-4"/> How It Works</Button>
- </Link>
-            {loading ? (
-              <Skeleton className="h-8 w-8 rounded-full" />
-            ) : user ? (
-              <UserMenu user={user} />
-            ) : (
-              <>
-                <Button variant="ghost" asChild>
-                  <Link href="/login">Log In</Link>
-                </Button>
-                <Button asChild>
-                   <Link href="/login">Sign Up</Link>
-                </Button>
-              </>
-            )}
-        </nav>
-      </div>
-    </header>
+    <>
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 max-w-7xl items-center">
+          <Logo />
+          <nav className="flex flex-1 items-center justify-end space-x-4">
+            <Button variant="ghost" onClick={() => setIsHowItWorksOpen(true)}>
+                <QuestionMarkCircleIcon className="mr-2 h-5 w-5"/> How It Works
+            </Button>
+              {loading ? (
+                <Skeleton className="h-8 w-8 rounded-full" />
+              ) : user ? (
+                <UserMenu user={user} />
+              ) : (
+                <>
+                  <Button variant="ghost" asChild>
+                    <Link href="/login">Log In</Link>
+                  </Button>
+                  <Button asChild>
+                     <Link href="/login">Sign Up</Link>
+                  </Button>
+                </>
+              )}
+          </nav>
+        </div>
+      </header>
+      <HowItWorksModal isOpen={isHowItWorksOpen} setIsOpen={setIsHowItWorksOpen} />
+    </>
   );
 };
 
