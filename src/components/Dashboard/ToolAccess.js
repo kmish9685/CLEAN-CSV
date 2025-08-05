@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext'; // Import useAuth hook
 import { useTrial } from '../../contexts/TrialContext'; // Import useTrial hook
 import toast from 'react-hot-toast'; // Import toast for notifications
+import Papa from 'papaparse'; // Import papaparse
 import { incrementTrialUsage, getSessionId } from '../../lib/supabase/client'; // Import trial functions
 
 const ToolAccess = () => {
@@ -14,19 +15,54 @@ const ToolAccess = () => {
   const [cleanedData, setCleanedData] = useState(null); // Store cleaned data
 
   // Placeholder for the CSV cleaning logic
-  const cleanCSV = async (file) => {
-    return new Promise((resolve) => {
-      // Simulate cleaning process with a delay
-      setTimeout(() => {
-        // In a real application, you would parse and clean the CSV here.
-        // For now, return mock cleaned data.
-        const mockCleanedData = [
-          ['Header 1', 'Header 2', 'Header 3'],
-          ['Data A1', 'Data B1', 'Data C1'],
-          ['Data A2', 'Data B2', 'Data C2'],
-        ];
-        resolve(mockCleanedData);
-      }, 2000); // Simulate a 2-second cleaning time
+  const cleanCSV = (file) => {
+    return new Promise((resolve, reject) => {
+      Papa.parse(file, {
+        header: false, // Set to true if your CSV has headers and you want objects
+        skipEmptyLines: true, // Automatically skip empty lines
+        complete: function(results) {
+          if (results.errors.length) {
+            console.error('CSV parsing errors:', results.errors);
+            reject(new Error('Error parsing CSV.'));
+            return;
+          }
+
+          let data = results.data;
+
+          // --- Cleaning Logic ---
+
+          // 1. Remove duplicate rows
+          // Convert each row to a string to easily check for duplicates
+          const stringifiedRows = data.map(row => JSON.stringify(row));
+          const uniqueStringifiedRows = Array.from(new Set(stringifiedRows));
+          data = uniqueStringifiedRows.map(rowString => JSON.parse(rowString));
+
+          // 2. Trim empty columns
+          // Identify columns that are entirely empty
+          const columnIsEmpty = new Array(data[0].length).fill(true);
+          for (const row of data) {
+              for (let i = 0; i < row.length; i++) {
+                  if (row[i] !== '' && row[i] !== null && row[i] !== undefined) {
+                      columnIsEmpty[i] = false;
+                  }
+              }
+          }
+          // Filter out the empty columns
+          data = data.map(row => row.filter((_, i) => !columnIsEmpty[i]));
+
+          // 3. Trim empty rows (PapaParse with skipEmptyLines: true handles basic empty lines,
+          // but this can be an extra check for rows that might become empty after column trimming)
+          data = data.filter(row => row.some(cell => cell !== '' && cell !== null && cell !== undefined));
+
+          // --- End Cleaning Logic ---
+
+          resolve(data);
+        },
+        error: function(err) {
+          console.error('CSV parsing error:', err);
+          reject(err);
+        }
+      });
     });
   };
 

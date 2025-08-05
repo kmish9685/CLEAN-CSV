@@ -2,8 +2,10 @@
 import type {Metadata} from 'next';
 import { Toaster } from "@/components/ui/toaster"; // Your existing Toaster
 import { Toaster as ReactHotToaster } from 'react-hot-toast'; // Toaster from react-hot-toast
+import { AuthProvider } from '../contexts/AuthContext';
+import { TrialProvider } from '../contexts/TrialContext';
+import TrialExpiredModal from '../components/Trial/TrialExpiredModal';
 import './globals.css';
-import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: 'CleanCSV | Clean Your CSV Files in Seconds',
@@ -23,12 +25,15 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased" suppressHydrationWarning>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Toaster /> {/* Your existing Toaster */} 
-          <ReactHotToaster position="top-right" /> {/* Toaster from react-hot-toast */} 
-        </ThemeProvider>
+      <body>
+        <AuthProvider>
+          <TrialProvider>
+            {children}
+            <TrialExpiredModal />
+            <Toaster /> {/* Your existing Toaster */}
+            <ReactHotToaster position="top-right" /> {/* Toaster from react-hot-toast */}
+          </TrialProvider>
+        </AuthProvider>
       </body>
     </html>
   );
