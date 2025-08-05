@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
@@ -14,7 +13,7 @@ import Faq from "@/components/landing/faq";
 import Footer from "@/components/landing/footer";
 import HowItWorks from "@/components/landing/how-it-works";
 import { Skeleton } from "@/components/ui/skeleton";
-import Dashboard from "@/components/Dashboard/Dashboard.tsx";
+import Dashboard from "@/components/Dashboard/Dashboard";
 
 export default function Home() {
   const supabase = createClient();
