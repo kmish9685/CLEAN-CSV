@@ -22,13 +22,12 @@ import {
 } from "@/components/ui/avatar";
 import { CreditCard, LogOut, User as UserIcon, HelpCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
 
 const UserMenu = ({ user }: { user: User }) => {
   const supabase = createClient();
   const signOut = async () => {
     await supabase.auth.signOut();
-    // Hard refresh to clear state
-    window.location.href = "/";
   };
 
   const getInitials = (email: string) => {
@@ -95,12 +94,15 @@ const Header = () => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      if(event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        // You can add a redirect or other logic here if needed
+      }
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, [supabase]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -111,7 +113,7 @@ const Header = () => {
                 <Link href="/#solution"><HelpCircle className="mr-2 h-4 w-4"/> How It Works</Link>
             </Button>
             {loading ? (
-              <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
+              <Skeleton className="h-8 w-8 rounded-full" />
             ) : user ? (
               <UserMenu user={user} />
             ) : (
