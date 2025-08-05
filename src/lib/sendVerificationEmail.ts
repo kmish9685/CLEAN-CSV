@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import Handlebars from 'handlebars';
-import template from 'raw-loader!../../templates/emailTemplate.hbs';
+import template from '../../templates/emailTemplate.hbs';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
