@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Star, MailWarning } from 'lucide-react';
 import Link from 'next/link';
 import { signOut } from './actions';
+import HowItWorks from '@/components/landing/how-it-works';
+import Tool from '@/components/landing/tool';
 
 async function App() {
   const cookieStore = cookies();
@@ -34,8 +36,6 @@ async function App() {
     return `${maskedLocalPart}@${maskedDomainName}.${topLevelDomain}`;
   };
 
-  // If the user is logged in but their email is not yet confirmed,
-  // show them a message to check their email.
   if (user && !user.email_confirmed_at) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-secondary p-4">
@@ -61,60 +61,34 @@ async function App() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-secondary p-4">
-       <Card className="w-full max-w-2xl">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl">Your App Dashboard</CardTitle>
-            <CardDescription>
-              Welcome back, {user.email || user.phone}.
-            </CardDescription>
-          </div>
-           <Badge variant={"secondary"} className="capitalize">
-             Free Plan
-           </Badge>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><CheckCircle className="text-primary" /> Basic Cleaning</CardTitle>
+    <div className="flex flex-col min-h-screen bg-secondary">
+      <main className="flex-1">
+         <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
+            <Card className="w-full">
+                <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle className="text-2xl">Your Dashboard</CardTitle>
+                    <CardDescription>
+                    Welcome back, {user.email || user.phone}.
+                    </CardDescription>
+                </div>
+                <div className="flex items-center gap-4">
+                    <Badge variant={"secondary"} className="capitalize">
+                        Free Plan
+                    </Badge>
+                    <form action={signOut}>
+                        <Button type="submit" variant="outline" size="sm">
+                            Sign Out
+                        </Button>
+                    </form>
+                </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Access standard data cleaning templates.</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                 <CardHeader>
-                   <CardTitle className="flex items-center gap-2">
-                     <Star className={"text-primary"} /> AI-Powered Suggestions
-                   </CardTitle>
-                 </CardHeader>
-                 <CardContent>
-                   <p className="text-muted-foreground">
-                     Unlock AI to automatically suggest the best cleaning strategies.
-                    </p>
-                 </CardContent>
-              </Card>
-          </div>
-
-        </CardContent>
-        <CardFooter className="border-t pt-6">
-            <Button className="w-full" asChild>
-                <Link href="/#tool">Ready To Go</Link>
-            </Button>
-        </CardFooter>
-      </Card>
-      <div className="mt-4 flex items-center gap-4">
-        <p className="text-xs text-muted-foreground">This is your protected app page. Only authenticated users can see this.</p>
-        <form action={signOut}>
-            <Button type="submit" variant="link" size="sm" className="text-xs p-0 h-auto">
-            Sign Out
-            </Button>
-        </form>
-      </div>
+            </Card>
+        </div>
+        
+        <HowItWorks />
+        <Tool />
+      </main>
     </div>
   );
 }

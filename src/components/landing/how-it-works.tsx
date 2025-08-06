@@ -5,22 +5,22 @@ import { UploadCloud, Wand2, Download, Eye } from "lucide-react";
 const steps = [
   {
     icon: UploadCloud,
-    title: "1. Upload",
-    description: "Drag & drop your messy CSV file into the tool section below.",
+    title: "1. Upload Your File",
+    description: "Start by uploading your CSV file using the upload area below.",
   },
   {
     icon: Eye,
-    title: "2. Preview",
-    description: "See a preview of your data before and after cleaning.",
+    title: "2. Preview Your Data",
+    description: "Your data will appear in the table below for you to preview.",
   },
   {
     icon: Wand2,
-    title: "3. Clean",
-    description: "Select from AI suggestions, templates, or custom rules to clean your data.",
+    title: "3. Clean & Organize",
+    description: "Use the cleaning tools to organize and format your data.",
   },
   {
     icon: Download,
-    title: "4. Download",
+    title: "4. Download Clean File",
     description: "Download your perfectly formatted data with a single click.",
   },
 ];
@@ -30,10 +30,10 @@ const HowItWorks = () => (
         <div className="container mx-auto max-w-7xl px-4">
             <div className="text-center">
                 <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    A Simple, 4-Step Process
+                    How It Works - Follow These 4 Steps
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground">
-                    Cleaning your data has never been this easy.
+                    Clean your CSV files in just 4 simple steps below.
                 </p>
             </div>
             <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">

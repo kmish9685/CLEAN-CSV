@@ -34,10 +34,10 @@ export default async function Home() {
           </div>
         }>
           <Hero />
-          <Tool />
           <SocialProof />
-          <Solution />
           <HowItWorks />
+          <Tool />
+          <Solution />
           <Pricing />
           <Testimonials />
           <Faq />
