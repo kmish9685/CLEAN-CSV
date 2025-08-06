@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +9,7 @@ const Footer = () => {
   const [year, setYear] = useState<number | null>(null);
 
   useEffect(() => {
+    // This will only run on the client, after hydration
     setYear(new Date().getFullYear());
   }, []);
 

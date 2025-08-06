@@ -7,6 +7,7 @@ export default function TermsPage() {
   const [lastUpdated, setLastUpdated] = useState('');
 
   useEffect(() => {
+    // This will only run on the client, after hydration
     setLastUpdated(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
   }, []);
 
