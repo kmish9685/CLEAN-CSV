@@ -6,19 +6,20 @@ export async function middleware(request: NextRequest) {
   const response = await updateSession(request);
 
   // Get the user from the Supabase client.
-  // The user object is now available in the request object thanks to `updateSession`.
   const supabase = response.locals.supabase;
   const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
 
-  // If the user is logged in and trying to access the landing page,
-  // redirect them to the dashboard.
-  if (user && pathname === '/') {
+  const publicAuthRoutes = ['/login', '/forgot-password', '/reset-password', '/signup'];
+
+  // If the user is logged in and trying to access a public-only route
+  // (like login, signup, or the main landing page), redirect them to the dashboard.
+  if (user && (pathname === '/' || publicAuthRoutes.includes(pathname))) {
     return NextResponse.redirect(new URL('/app', request.url));
   }
 
-  // If the user is not logged in and trying to access the app,
+  // If the user is not logged in and trying to access a protected route,
   // redirect them to the login page.
   if (!user && pathname.startsWith('/app')) {
     return NextResponse.redirect(new URL('/login', request.url));
