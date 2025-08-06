@@ -11,16 +11,17 @@ import { useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import PhoneForm from "./phone-form";
 import { useFormStatus } from "react-dom";
 
-function SubmitButton({ children, ...props }: React.ComponentProps<typeof Button>) {
-  const { pending } = useFormStatus();
+function SubmitButton({ children, pending: formPending, ...props }: React.ComponentProps<typeof Button> & { pending?: boolean }) {
+  const { pending: hookPending } = useFormStatus();
+  const isPending = formPending || hookPending;
+
   return (
-    <Button type="submit" disabled={pending} {...props}>
-      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-      {pending ? "Please wait..." : children}
+    <Button type="submit" disabled={isPending} {...props}>
+      {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+      {isPending ? "Please wait..." : children}
     </Button>
   );
 }
@@ -95,35 +96,22 @@ function LoginPageContent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {!isClient ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-4 w-24" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-10 w-full" />
+              <form action={login} className="space-y-4">
+                  <Suspense fallback={null}>
+                    <LoginMessages />
+                  </Suspense>
+                <fieldset disabled={!isClient} className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" name="email" type="email" placeholder="m@example.com" required />
                   </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-10 w-full" />
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input id="password" name="password" type="password" required />
                   </div>
-                  <Skeleton className="h-11 w-full" />
-                </div>
-              ) : (
-                <>
-                  <form action={login} className="space-y-4">
-                     <LoginMessages />
-                    <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" name="email" type="email" placeholder="m@example.com" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="password">Password</Label>
-                      <Input id="password" name="password" type="password" required />
-                    </div>
-                    <SubmitButton className="w-full">Login</SubmitButton>
-                  </form>
-                </>
-              )}
+                  <SubmitButton className="w-full" pending={!isClient}>Login</SubmitButton>
+                </fieldset>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>
@@ -139,35 +127,22 @@ function LoginPageContent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {!isClient ? (
-                  <div className="space-y-4">
-                    <Skeleton className="h-4 w-24" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-10 w-full" />
-                    </div>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-10 w-full" />
-                    </div>
-                    <Skeleton className="h-11 w-full" />
+              <form action={signup} className="space-y-4">
+                <Suspense fallback={null}>
+                  <SignupMessages />
+                </Suspense>
+                <fieldset disabled={!isClient} className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="email-signup">Email</Label>
+                    <Input id="email-signup" name="email" type="email" placeholder="m@example.com" required />
                   </div>
-                ) : (
-                <>
-                  <form action={signup} className="space-y-4">
-                    <SignupMessages />
-                    <div className="grid gap-2">
-                      <Label htmlFor="email-signup">Email</Label>
-                      <Input id="email-signup" name="email" type="email" placeholder="m@example.com" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="password-signup">Password</Label>
-                      <Input id="password-signup" name="password" type="password" required />
-                    </div>
-                    <SubmitButton className="w-full">Sign Up</SubmitButton>
-                  </form>
-                </>
-                )}
+                  <div className="grid gap-2">
+                    <Label htmlFor="password-signup">Password</Label>
+                    <Input id="password-signup" name="password" type="password" required />
+                  </div>
+                  <SubmitButton className="w-full" pending={!isClient}>Sign Up</SubmitButton>
+                </fieldset>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>
