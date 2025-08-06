@@ -26,31 +26,31 @@ const steps = [
 ];
 
 const HowItWorks = () => (
-    <section id="how-it-works" className="py-20 sm:py-24 bg-secondary">
-        <div className="container mx-auto max-w-7xl px-4">
-            <div className="text-center">
-                <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    How It Works - Follow These 4 Steps
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                    Clean your CSV files in just 4 simple steps below.
-                </p>
-            </div>
-            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-                {steps.map((step) => (
-                <Card key={step.title} className="text-center transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl">
-                    <CardHeader>
-                        <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <step.icon className="h-8 w-8" />
-                        </div>
-                    </CardHeader>
-                    <CardTitle className="font-headline text-xl mb-2">{step.title}</CardTitle>
-                    <CardDescription className="p-4 pt-0">{step.description}</CardDescription>
-                </Card>
-                ))}
-            </div>
+    <div className="bg-card rounded-xl p-4 shadow-lg ring-1 ring-border">
+        <div className="text-center mb-8">
+            <h2 className="font-headline text-2xl font-bold tracking-tight text-foreground">
+                How It Works
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+                Clean your CSV files in 4 simple steps.
+            </p>
         </div>
-    </section>
+        <div className="grid grid-cols-1 gap-4">
+            {steps.map((step) => (
+            <Card key={step.title} className="text-left bg-secondary border-none shadow-none">
+                <CardHeader className="flex flex-row items-center gap-4 p-4">
+                    <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary flex-shrink-0">
+                        <step.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <CardTitle className="font-headline text-base mb-1">{step.title}</CardTitle>
+                        <CardDescription className="text-xs">{step.description}</CardDescription>
+                    </div>
+                </CardHeader>
+            </Card>
+            ))}
+        </div>
+    </div>
 );
 
 export default HowItWorks;

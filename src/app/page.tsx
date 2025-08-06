@@ -10,7 +10,6 @@ import Footer from "@/components/landing/footer";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Hero from "@/components/landing/hero";
-import HowItWorks from "@/components/landing/how-it-works";
 
 export default async function Home() {
   return (
@@ -24,7 +23,6 @@ export default async function Home() {
         }>
           <Hero />
           <SocialProof />
-          <HowItWorks />
           <Tool />
           <Solution />
           <Pricing />
