@@ -19,8 +19,9 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    console.error(error)
-    return redirect(`/login?message=${encodeURIComponent(error.message)}&type=login-error`)
+    // Log the error for debugging but return a user-friendly message
+    console.error("Login Error:", error.message)
+    return redirect(`/login?message=${encodeURIComponent("Invalid email or password. Please try again.")}&type=login-error`)
   }
 
   revalidatePath('/', 'layout')
@@ -33,11 +34,12 @@ export async function signup(formData: FormData) {
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   
+  // Use the NEXT_PUBLIC_SITE_URL for the redirect path
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   if (!siteUrl) {
     console.error("NEXT_PUBLIC_SITE_URL is not set in .env file");
-    return redirect(`/login?message=${encodeURIComponent("Server configuration error.")}&type=signup-error`);
+    return redirect(`/login?message=${encodeURIComponent("Server configuration error. Cannot process signup.")}&type=signup-error`);
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -49,14 +51,19 @@ export async function signup(formData: FormData) {
   });
 
   if (error) {
-    console.log(error);
-    return redirect(`/login?message=${encodeURIComponent(error.message)}&type=signup-error`);
+    console.log("Signup Error:", error.message);
+    // Provide a more specific message if possible
+    if (error.message.includes("User already registered")) {
+         return redirect(`/login?message=${encodeURIComponent("An account with this email already exists. Please log in.")}&type=signup-error`);
+    }
+    return redirect(`/login?message=${encodeURIComponent("Could not sign you up. Please try again.")}&type=signup-error`);
   }
 
-  if (data.user && data.user.identities && data.user.identities.length === 0) {
-     return redirect(`/login?message=${encodeURIComponent("User with this email already exists.")}&type=signup-error`);
+  // Check if the user exists but their email is not confirmed (common case for re-signups)
+  if (data.user && !data.user.email_confirmed_at) {
+     return redirect(`/login?message=${encodeURIComponent("A confirmation link has been sent to your email. Please verify to continue.")}&type=signup-success`);
   }
 
   revalidatePath('/', 'layout');
-  return redirect(`/login?message=Confirmation link sent. Check your email.&type=signup-success`);
+  return redirect(`/login?message=Confirmation link sent successfully. Please check your email.&type=signup-success`);
 }
