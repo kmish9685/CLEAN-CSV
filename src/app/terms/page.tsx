@@ -49,7 +49,7 @@ export default function TermsPage() {
 
       <h2 className="text-2xl font-bold mt-8 mb-4">5. Limitation of Liability</h2>
       <p>
-        The service is provided "as is." In no event shall CleanCSV, nor its directors, employees, or partners, be liable for any indirect, incidental, or consequential damages, including but not limited to, data loss, service interruptions, or loss of profits arising out of the use or inability to use the service.
+        The service is provided "as is." In no event shall CleanCSV, nor its directors, employees, or partners, be liable for any indirect, incidental, or consequential damages, including but not to, data loss, service interruptions, or loss of profits arising out of the use or inability to use the service.
       </p>
 
       <h2 className="text-2xl font-bold mt-8 mb-4">6. Modifications to Terms</h2>
