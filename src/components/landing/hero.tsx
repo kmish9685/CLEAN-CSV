@@ -38,9 +38,7 @@ const Hero = () => (
             Your data is processed securely and deleted after 1 hour.
           </p>
         </div>
-        <div className="rounded-xl bg-card p-4 shadow-lg ring-1 ring-border flex items-center justify-center">
-            <img src="https://placehold.co/600x400.png" alt="Tool Preview" className="rounded-lg" data-ai-hint="app screenshot" />
-        </div>
+        <HowItWorks />
       </div>
     </div>
   </section>
