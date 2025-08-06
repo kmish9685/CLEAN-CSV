@@ -9,7 +9,6 @@ import { CheckCircle, Star, MailWarning } from 'lucide-react';
 import Link from 'next/link';
 import { signOut } from './actions';
 import HowItWorks from '@/components/landing/how-it-works';
-import Tool from '@/components/landing/tool';
 
 async function App() {
   const cookieStore = cookies();
@@ -87,7 +86,6 @@ async function App() {
         </div>
         
         <HowItWorks />
-        <Tool />
       </main>
     </div>
   );
