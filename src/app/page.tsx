@@ -14,6 +14,7 @@ import HowItWorks from "@/components/landing/how-it-works";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import App from "./app/page";
+import Hero from "@/components/landing/hero";
 
 export default async function Home() {
   const cookieStore = cookies();
@@ -33,9 +34,9 @@ export default async function Home() {
             <Skeleton className="h-[400px] w-full" />
           </div>
         }>
+          <Hero />
           <Tool />
           <SocialProof />
-          <HowItWorks />
           <Solution />
           <Pricing />
           <Testimonials />
