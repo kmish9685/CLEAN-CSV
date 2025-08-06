@@ -3,11 +3,14 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
+import { z } from 'zod';
 
 type FormState = {
   message: string | null;
   type: 'success' | 'error' | null;
 };
+
+const EmailSchema = z.string().email({ message: "Invalid email address." });
 
 export async function forgotPassword(
   prevState: FormState,
@@ -15,14 +18,17 @@ export async function forgotPassword(
 ): Promise<FormState> {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
-  const email = formData.get('email') as string;
 
-  if (!email) {
+  const emailResult = EmailSchema.safeParse(formData.get('email'));
+
+  if (!emailResult.success) {
     return {
-      message: 'Please provide your email address.',
+      message: emailResult.error.errors[0].message,
       type: 'error',
     };
   }
+  
+  const email = emailResult.data;
 
   // Use the NEXT_PUBLIC_SITE_URL for the redirect path
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;

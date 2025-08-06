@@ -6,7 +6,7 @@ import { forgotPassword } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -64,11 +64,11 @@ export default function ForgotPasswordPage() {
                     <SubmitButton className="w-full">Send Reset Link</SubmitButton>
                 </form>
             </CardContent>
-             <CardContent className="mt-4 text-center">
+             <CardFooter className="mt-4 text-center block">
                  <Button variant="link" asChild>
                     <Link href="/login">Back to Login</Link>
                 </Button>
-            </CardContent>
+            </CardFooter>
         </Card>
     </div>
   );

@@ -33,9 +33,10 @@ export default function PhoneForm() {
   const message = searchParams.get('message')
   const messageType = searchParams.get('type')
   const phoneParam = searchParams.get('phone')
+  const isOtpSentFlow = messageType === 'otp-sent';
 
   const [phone, setPhone] = useState(phoneParam || '')
-  const [otpSent, setOtpSent] = useState(!!phoneParam)
+  const [otpSent, setOtpSent] = useState(isOtpSentFlow || !!phoneParam)
   const [error, setError] = useState<string | null>(null)
   
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -46,7 +47,7 @@ export default function PhoneForm() {
     timerRef.current = setInterval(() => {
         setResendCooldown((prev) => {
             if (prev <= 1) {
-                clearInterval(timerRef.current!);
+                if(timerRef.current) clearInterval(timerRef.current);
                 return 0;
             }
             return prev - 1;
@@ -55,22 +56,22 @@ export default function PhoneForm() {
   }, []);
 
   useEffect(() => {
-    if (otpSent) {
+    if (isOtpSentFlow) {
       startCooldown();
-    } else {
-        if(timerRef.current) clearInterval(timerRef.current);
     }
+    // Clean up timer on component unmount
     return () => {
         if (timerRef.current) clearInterval(timerRef.current)
     };
-  }, [otpSent, startCooldown]);
+  }, [isOtpSentFlow, startCooldown]);
 
   useEffect(() => {
-    if (phoneParam) {
-      setPhone(phoneParam)
-      if(!otpSent) setOtpSent(true)
-    }
-  }, [phoneParam, otpSent]);
+    // Sync state if URL params change
+    const phoneInUrl = searchParams.get('phone');
+    const typeInUrl = searchParams.get('type');
+    setPhone(phoneInUrl || '');
+    setOtpSent(typeInUrl === 'otp-sent' || !!phoneInUrl && typeInUrl !=='otp-error');
+  }, [searchParams]);
 
   const handleSendOtp = (formData: FormData) => {
     const phoneValue = formData.get('phone') as string;
@@ -83,10 +84,13 @@ export default function PhoneForm() {
   }
 
   const handleDifferentNumber = () => {
+    // Reset state and URL
     setOtpSent(false);
     setPhone('');
-    // Navigate to clean up URL params
-    router.push(pathname);
+    if (timerRef.current) clearInterval(timerRef.current);
+    setResendCooldown(0);
+    const newPath = `${pathname}?tab=phone`;
+    router.replace(newPath, { scroll: false });
   }
 
   return (
@@ -98,7 +102,7 @@ export default function PhoneForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {message && messageType?.startsWith('otp-') && (
+        {message && messageType?.includes('otp-') && (
           <Alert variant={messageType === 'otp-error' ? 'destructive' : 'default'}>
             <AlertTitle>{messageType === 'otp-error' ? 'Error' : 'Info'}</AlertTitle>
             <AlertDescription>{message}</AlertDescription>
@@ -113,7 +117,7 @@ export default function PhoneForm() {
 
         {!otpSent ? (
           <form action={handleSendOtp} className="space-y-4">
-             <input type="hidden" name="redirectTo" value={`${pathname}#phone`} />
+             <input type="hidden" name="redirectTo" value={`${pathname}?tab=phone`} />
             <div className="grid gap-2">
               <Label htmlFor="phone">Phone Number</Label>
               <PhoneInput
@@ -131,7 +135,7 @@ export default function PhoneForm() {
           </form>
         ) : (
           <form action={verifyOtp} className="space-y-4">
-            <Input type="hidden" name="phone" value={phone} />
+            <input type="hidden" name="phone" value={phone} />
             <div className="grid gap-2">
               <Label htmlFor="otp">One-Time Password</Label>
               <Input 
@@ -145,20 +149,19 @@ export default function PhoneForm() {
               />
             </div>
             <PhoneSubmitButton className="w-full">Verify Code & Sign In</PhoneSubmitButton>
-            <div className="flex justify-between items-center">
-                <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleDifferentNumber}>
+            <div className="flex justify-between items-center mt-4">
+                <Button variant="link" size="sm" className="p-0 h-auto" type="button" onClick={handleDifferentNumber}>
                     Use a different number
                 </Button>
                 
                 <form action={handleSendOtp}>
                      <input type="hidden" name="phone" value={phone} />
-                     <input type="hidden" name="redirectTo" value={`${pathname}#phone`} />
+                     <input type="hidden" name="redirectTo" value={`${pathname}?tab=phone`} />
                      <Button type="submit" variant="link" size="sm" className="p-0 h-auto" disabled={resendCooldown > 0}>
                         Resend OTP {resendCooldown > 0 ? `(${resendCooldown}s)` : ''}
                     </Button>
                 </form>
             </div>
-
           </form>
         )}
       </CardContent>
