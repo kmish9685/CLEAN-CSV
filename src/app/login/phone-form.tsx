@@ -30,6 +30,12 @@ export default function PhoneForm() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+
   const message = searchParams.get('message')
   const messageType = searchParams.get('type')
   const phoneParam = searchParams.get('phone')
@@ -92,6 +98,15 @@ export default function PhoneForm() {
     const newPath = `${pathname}?tab=phone`;
     router.replace(newPath, { scroll: false });
   }
+
+  if (!isClient) {
+    return (
+        <Card className="h-[400px] flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </Card>
+    );
+  }
+
 
   return (
     <Card>
