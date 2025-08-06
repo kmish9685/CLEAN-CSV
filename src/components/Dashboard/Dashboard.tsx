@@ -1,8 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import React from 'react';
 import type { User } from '@supabase/supabase-js';
 import Pricing from '../landing/pricing';
 import Solution from '../landing/solution';
@@ -10,37 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { CheckCircle, Star } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
-const Dashboard = () => {
-  const supabase = createClient();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+interface DashboardProps {
+  user: User | null;
+}
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
-
-    getUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [supabase]);
-
-
-  if (loading) {
-    return <p>Loading dashboard...</p>;
-  }
-
+const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   if (!user) {
-    // This component should ideally be protected by routing,
-    // but as a fallback, we can handle the case where user is not logged in.
     return null;
   }
 

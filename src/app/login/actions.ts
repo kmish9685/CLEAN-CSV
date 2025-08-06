@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { sendVerificationEmail } from '@/lib/sendVerificationEmail';
 
 export async function login(formData: FormData) {
   const cookieStore = cookies()
@@ -39,8 +38,6 @@ export async function signup(formData: FormData) {
     email,
     password,
     options: {
-      // Important: This prevents Supabase from sending its own email.
-      // We will handle it manually with Resend.
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
     },
   });
@@ -51,15 +48,9 @@ export async function signup(formData: FormData) {
   }
 
   if (data.user && data.user.identities && data.user.identities.length === 0) {
-    // This indicates a user with the same email already exists.
      return redirect(`/login?message=${encodeURIComponent("User with this email already exists.")}&type=signup-error`);
   }
 
-   if (data.user) {
-    await sendVerificationEmail(email, data.user.id);
-  }
-
-
   revalidatePath('/', 'layout');
-  return redirect(`/login?message=Verification link sent to ${email}. Please check your inbox.&type=signup-success`);
+  return redirect(`/login?message=Confirmation link sent. Check your email.&type=signup-success`);
 }

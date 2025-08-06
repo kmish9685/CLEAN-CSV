@@ -23,9 +23,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap" rel="stylesheet" />
       </head>
       <body>
-          {children}
-          <Toaster /> {/* Your existing Toaster */}
-          <ReactHotToaster position="top-right" /> {/* Toaster from react-hot-toast */}
+        {children}
+        <Toaster /> {/* Your existing Toaster */}
+        <ReactHotToaster position="top-right" /> {/* Toaster from react-hot-toast */}
       </body>
     </html>
   );

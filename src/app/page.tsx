@@ -64,7 +64,7 @@ export default function Home() {
               <Faq />
             </>
           ) : (
-            <Dashboard />
+            <Dashboard user={user} />
           )}
         </Suspense>
       </main>
