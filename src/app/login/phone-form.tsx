@@ -1,8 +1,8 @@
 
 "use client"
 
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { useSearchParams, usePathname } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,6 +27,7 @@ function PhoneSubmitButton({ children, ...props }: React.ComponentProps<typeof B
 
 export default function PhoneForm() {
   const searchParams = useSearchParams()
+  const pathname = usePathname();
   const message = searchParams.get('message')
   const messageType = searchParams.get('type')
   const phoneParam = searchParams.get('phone')
@@ -34,12 +35,38 @@ export default function PhoneForm() {
   const [phone, setPhone] = useState(phoneParam || '')
   const [otpSent, setOtpSent] = useState(!!phoneParam)
   const [error, setError] = useState<string | null>(null)
+  
+  const [resendCooldown, setResendCooldown] = useState(30);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (otpSent) {
+      timerRef.current = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current!);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+        if(timerRef.current) clearInterval(timerRef.current);
+        setResendCooldown(30);
+    }
+    return () => {
+        if (timerRef.current) clearInterval(timerRef.current)
+    };
+  }, [otpSent]);
 
   // Sync the phone number from URL params to state
   useEffect(() => {
     if (phoneParam) {
       setPhone(phoneParam)
       setOtpSent(true)
+    } else {
+      setPhone('')
+      setOtpSent(false)
     }
   }, [phoneParam])
 
@@ -50,6 +77,7 @@ export default function PhoneForm() {
       return;
     }
     setError(null)
+    setResendCooldown(30);
     sendOtp(formData)
   }
 
@@ -77,6 +105,7 @@ export default function PhoneForm() {
 
         {!otpSent ? (
           <form action={handleSendOtp} className="space-y-4">
+             <input type="hidden" name="redirectTo" value={`${pathname}#phone`} />
             <div className="grid gap-2">
               <Label htmlFor="phone">Phone Number</Label>
               <PhoneInput
@@ -108,12 +137,24 @@ export default function PhoneForm() {
               />
             </div>
             <PhoneSubmitButton className="w-full">Verify Code & Sign In</PhoneSubmitButton>
-            <Button variant="link" size="sm" className="w-full" onClick={() => {
-              setOtpSent(false)
-              setPhone('')
-            }}>
-              Use a different phone number
-            </Button>
+            <div className="flex justify-between items-center">
+                <Button variant="link" size="sm" className="p-0 h-auto" onClick={() => {
+                    setOtpSent(false)
+                    // Reset URL state by navigating
+                    window.history.pushState({}, '', '/login');
+                }}>
+                Use a different number
+                </Button>
+                
+                <form action={handleSendOtp}>
+                     <input type="hidden" name="phone" value={phone} />
+                     <input type="hidden" name="redirectTo" value={`${pathname}#phone`} />
+                     <Button type="submit" variant="link" size="sm" className="p-0 h-auto" disabled={resendCooldown > 0}>
+                        Resend OTP {resendCooldown > 0 ? `(${resendCooldown}s)` : ''}
+                    </Button>
+                </form>
+            </div>
+
           </form>
         )}
       </CardContent>
