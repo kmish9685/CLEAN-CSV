@@ -7,12 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { login, signup } from "./actions";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import PhoneForm from "./phone-form";
-import { useFormStatus } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 
 function SubmitButton({ children, ...props }: React.ComponentProps<typeof Button>) {
@@ -26,10 +26,10 @@ function SubmitButton({ children, ...props }: React.ComponentProps<typeof Button
   );
 }
 
-function AuthMessages() {
+function AuthMessages({ state }: { state: { message: string | null, type: string | null } | null }) {
     const searchParams = useSearchParams();
-    const message = searchParams.get('message');
-    const type = searchParams.get('type');
+    const message = searchParams.get('message') || state?.message;
+    const type = searchParams.get('type') || state?.type;
 
     if (!message) return null;
 
@@ -39,6 +39,54 @@ function AuthMessages() {
             <AlertDescription>{message}</AlertDescription>
         </Alert>
     )
+}
+
+const initialLoginState = {
+  message: null,
+  type: null,
+};
+
+function LoginForm() {
+    const [state, formAction] = useFormState(login, initialLoginState);
+    const router = useRouter();
+
+    useEffect(() => {
+        if (state.type === 'success') {
+            router.push('/app');
+        }
+    }, [state, router]);
+
+    return (
+        <Card>
+        <CardHeader>
+            <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+            <CardDescription>
+            Enter your credentials to access your account.
+            </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+            <AuthMessages state={state} />
+            <form action={formAction} className="space-y-4">
+            <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" placeholder="you@example.com" required />
+            </div>
+            <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Link href="/forgot-password" passHref>
+                        <Button variant="link" size="sm" className="p-0 h-auto text-xs">
+                        Forgot Password?
+                        </Button>
+                    </Link>
+                </div>
+                <Input id="password" name="password" type="password" required />
+            </div>
+            <SubmitButton className="w-full">Login</SubmitButton>
+            </form>
+        </CardContent>
+        </Card>
+    );
 }
 
 export default function LoginPageContent() {
@@ -68,35 +116,7 @@ export default function LoginPageContent() {
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
         </TabsList>
         <TabsContent value="login">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-              <CardDescription>
-                Enter your credentials to access your account.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <AuthMessages />
-              <form action={login} className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" placeholder="you@example.com" required />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
-                      <Link href="/forgot-password" passHref>
-                          <Button variant="link" size="sm" className="p-0 h-auto text-xs">
-                            Forgot Password?
-                          </Button>
-                      </Link>
-                  </div>
-                  <Input id="password" name="password" type="password" required />
-                </div>
-                <SubmitButton className="w-full">Login</SubmitButton>
-              </form>
-            </CardContent>
-          </Card>
+          <LoginForm />
         </TabsContent>
         <TabsContent value="phone">
           <PhoneForm />
@@ -110,7 +130,7 @@ export default function LoginPageContent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <AuthMessages />
+                <AuthMessages state={null} />
               <form action={signup} className="space-y-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email-signup">Email</Label>

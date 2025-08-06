@@ -6,12 +6,27 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-export async function login(formData: FormData) {
+type FormState = {
+  message: string | null;
+  type: 'success' | 'error' | null;
+};
+
+export async function login(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
   const cookieStore = cookies()
   const supabase = createClient(cookieStore)
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+
+  if (!email || !password) {
+    return {
+      message: 'Email and password are required.',
+      type: 'error',
+    };
+  }
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -19,13 +34,19 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    // Log the error for debugging but return a user-friendly message
     console.error("Login Error:", error.message)
-    return redirect(`/login?message=${encodeURIComponent("Invalid email or password. Please try again.")}&type=login-error`)
+    return {
+      message: 'Invalid email or password. Please try again.',
+      type: 'error',
+    };
   }
 
   revalidatePath('/', 'layout')
-  redirect('/app')
+  // We will redirect on the client side based on the success state
+  return {
+    message: 'Login successful!',
+    type: 'success',
+  };
 }
 
 export async function signup(formData: FormData) {
