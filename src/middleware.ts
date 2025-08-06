@@ -1,8 +1,30 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  // First, run the Supabase middleware to ensure the session is fresh.
+  const response = await updateSession(request);
+
+  // Get the user from the Supabase client.
+  // The user object is now available in the request object thanks to `updateSession`.
+  const supabase = response.locals.supabase;
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+
+  // If the user is logged in and trying to access the landing page,
+  // redirect them to the dashboard.
+  if (user && pathname === '/') {
+    return NextResponse.redirect(new URL('/app', request.url));
+  }
+
+  // If the user is not logged in and trying to access the app,
+  // redirect them to the login page.
+  if (!user && pathname.startsWith('/app')) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+  
+  return response;
 }
 
 export const config = {

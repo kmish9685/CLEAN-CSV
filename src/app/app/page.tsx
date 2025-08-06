@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { signOut } from './actions';
 import HowItWorks from '@/components/landing/how-it-works';
 import Tool from '@/components/landing/tool';
+import Header from '@/components/landing/header';
 
 async function App() {
   const cookieStore = cookies();
@@ -17,6 +18,8 @@ async function App() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
+  // This should theoretically not be hit if middleware is correct,
+  // but it's good practice for defense-in-depth.
   if (!user) {
     return redirect('/login');
   }
@@ -36,6 +39,7 @@ async function App() {
     return `${maskedLocalPart}@${maskedDomainName}.${topLevelDomain}`;
   };
 
+  // Screen for users who are logged in but have not confirmed their email
   if (user && !user.email_confirmed_at) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-secondary p-4">
@@ -60,32 +64,11 @@ async function App() {
     );
   }
 
+  // Main dashboard for authenticated and verified users
   return (
     <div className="flex flex-col min-h-screen bg-secondary">
+      <Header />
       <main className="flex-1">
-         <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
-            <Card className="w-full">
-                <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle className="text-2xl">Your Dashboard</CardTitle>
-                    <CardDescription>
-                    Welcome back, {user.email || user.phone}.
-                    </CardDescription>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Badge variant={"secondary"} className="capitalize">
-                        Free Plan
-                    </Badge>
-                    <form action={signOut}>
-                        <Button type="submit" variant="outline" size="sm">
-                            Sign Out
-                        </Button>
-                    </form>
-                </div>
-                </CardHeader>
-            </Card>
-        </div>
-        
         <HowItWorks />
         <Tool />
       </main>
