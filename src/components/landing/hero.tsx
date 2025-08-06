@@ -39,16 +39,15 @@ const Hero = () => (
             Your data is processed securely and deleted after 1 hour.
           </p>
         </div>
-        <div className="rounded-xl bg-card p-4 shadow-lg ring-1 ring-border flex flex-col md:flex-row items-center gap-4">
+        <div className="rounded-xl bg-card p-4 shadow-lg ring-1 ring-border flex items-center justify-center">
              <Image 
                 src="https://images.unsplash.com/photo-1718202248160-59558af70521?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHwzRHxlbnwwfHx8fDE3NTQyMzMwMjh8MA&ixlib=rb-4.1.0&q=80&w=1080"
                 alt="CSV data cleaning transformation illustration"
-                width={200}
-                height={80}
+                width={400}
+                height={250}
                 className="rounded-lg object-cover"
                 data-ai-hint="data transformation business"
             />
-            <HowItWorks />
         </div>
       </div>
     </div>
