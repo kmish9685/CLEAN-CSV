@@ -54,7 +54,7 @@ export default function Home() {
                 <Skeleton className="h-24 w-full mb-8" />
                 <Skeleton className="h-64 w-full" />
              </div>
-          ) : !user && (
+          ) : !user ? (
             <>
               <SocialProof />
               <HowItWorks />
@@ -63,8 +63,9 @@ export default function Home() {
               <Testimonials />
               <Faq />
             </>
+          ) : (
+            <Dashboard />
           )}
-           {user && <Dashboard />}
         </Suspense>
       </main>
       <Footer />
