@@ -26,6 +26,21 @@ async function App() {
     return redirect('/');
   };
 
+  const maskEmail = (email: string | undefined) => {
+    if (!email) return "";
+    const [localPart, domain] = email.split('@');
+    if (!localPart || !domain) return "";
+
+    const maskedLocalPart = localPart.length > 2
+      ? `${localPart.substring(0, 2)}${'*'.repeat(localPart.length - 2)}`
+      : `${localPart.substring(0, 1)}*`;
+
+    const [domainName, topLevelDomain] = domain.split('.');
+    const maskedDomainName = '*'.repeat(domainName.length);
+
+    return `${maskedLocalPart}@${maskedDomainName}.${topLevelDomain}`;
+  };
+
   // If the user is logged in but their email is not yet confirmed,
   // show them a message to check their email.
   if (user && !user.email_confirmed_at) {
@@ -36,7 +51,7 @@ async function App() {
                     <MailWarning className="w-16 h-16 mx-auto text-primary" />
                     <CardTitle className="mt-4 text-2xl">Confirm Your Email</CardTitle>
                     <CardDescription className="mt-2">
-                        We've sent a confirmation link to <strong>{user.email}</strong>.
+                        We've sent a confirmation link to <strong>{maskEmail(user.email)}</strong>.
                         Please check your inbox (and spam folder) to complete your registration.
                     </CardDescription>
                 </CardHeader>
