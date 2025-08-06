@@ -42,11 +42,7 @@ export async function login(
   }
 
   revalidatePath('/', 'layout')
-  // We will redirect on the client side based on the success state
-  return {
-    message: 'Login successful!',
-    type: 'success',
-  };
+  redirect('/app')
 }
 
 export async function signup(formData: FormData) {

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { login, signup } from "./actions";
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -48,13 +48,6 @@ const initialLoginState = {
 
 function LoginForm() {
     const [state, formAction] = useFormState(login, initialLoginState);
-    const router = useRouter();
-
-    useEffect(() => {
-        if (state.type === 'success') {
-            router.push('/app');
-        }
-    }, [state, router]);
 
     return (
         <Card>
