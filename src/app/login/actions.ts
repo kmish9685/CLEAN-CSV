@@ -33,12 +33,18 @@ export async function signup(formData: FormData) {
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  
+  if (!siteUrl) {
+    console.error("NEXT_PUBLIC_SITE_URL is not set in .env file");
+    return redirect(`/login?message=${encodeURIComponent("Server configuration error.")}&type=signup-error`);
+  }
 
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   });
 

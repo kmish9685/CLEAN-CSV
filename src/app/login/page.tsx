@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState, Suspense } from "react";
 import PhoneForm from "./phone-form";
 import { useFormStatus } from "react-dom";
+import Link from "next/link";
 
 function SubmitButton({ children, pending: formPending, ...props }: React.ComponentProps<typeof Button> & { pending?: boolean }) {
   const { pending: hookPending } = useFormStatus();
@@ -27,24 +28,22 @@ function SubmitButton({ children, pending: formPending, ...props }: React.Compon
 }
 
 function LoginMessages() {
-    // This component uses the useSearchParams hook, which is why its parent
-    // needs to be wrapped in a <Suspense> boundary.
     const searchParams = useSearchParams();
     const message = searchParams.get('message');
     const messageType = searchParams.get('type');
 
     if (!message) return null;
 
-    if (messageType === 'login-error') {
+    if (messageType?.includes('error')) {
         return (
             <Alert variant="destructive">
-                <AlertTitle>Login Failed</AlertTitle>
+                <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{message}</AlertDescription>
             </Alert>
         )
     }
 
-    if (messageType === 'success' || messageType === 'signup-success') {
+    if (messageType?.includes('success')) {
         return (
             <Alert>
                 <AlertTitle>Success!</AlertTitle>
@@ -53,23 +52,6 @@ function LoginMessages() {
         )
     }
     
-    return null;
-}
-
-function SignupMessages() {
-    // This component also uses the useSearchParams hook.
-    const searchParams = useSearchParams();
-    const message = searchParams.get('message');
-    const messageType = searchParams.get('type');
-
-    if (message && messageType === 'signup-error') {
-      return (
-        <Alert variant="destructive">
-          <AlertTitle>Signup Failed</AlertTitle>
-          <AlertDescription>{message}</AlertDescription>
-        </Alert>
-      )
-    }
     return null;
 }
 
@@ -96,17 +78,24 @@ function LoginPageContent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <Suspense fallback={null}>
+                <LoginMessages />
+              </Suspense>
               <form action={login} className="space-y-4">
-                  <Suspense fallback={null}>
-                    <LoginMessages />
-                  </Suspense>
                 <fieldset disabled={!isClient} className="space-y-4">
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" name="email" type="email" placeholder="m@example.com" required />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Password</Label>
+                        <Link href="/forgot-password" passHref>
+                           <Button variant="link" size="sm" className="p-0 h-auto text-xs">
+                             Forgot Password?
+                           </Button>
+                        </Link>
+                    </div>
                     <Input id="password" name="password" type="password" required />
                   </div>
                   <SubmitButton className="w-full" pending={!isClient}>Login</SubmitButton>
@@ -127,10 +116,10 @@ function LoginPageContent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <form action={signup} className="space-y-4">
-                <Suspense fallback={null}>
-                  <SignupMessages />
+               <Suspense fallback={null}>
+                  <LoginMessages />
                 </Suspense>
+              <form action={signup} className="space-y-4">
                 <fieldset disabled={!isClient} className="space-y-4">
                   <div className="grid gap-2">
                     <Label htmlFor="email-signup">Email</Label>
@@ -151,11 +140,7 @@ function LoginPageContent() {
   );
 }
 
-
 export default function LoginPage() {
-  // Wrapping LoginPageContent in <Suspense> is required because it uses the
-  // useSearchParams() hook for reading URL parameters. Next.js needs this
-  // to handle dynamic rendering on the client side correctly.
   return (
     <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div>Loading...</div></div>}>
       <LoginPageContent />

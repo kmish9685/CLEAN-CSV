@@ -1,8 +1,8 @@
 
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
-import { useSearchParams, usePathname } from 'next/navigation'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSearchParams, usePathname, useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,11 +23,13 @@ function PhoneSubmitButton({ children, ...props }: React.ComponentProps<typeof B
         {pending ? "Please wait..." : children}
       </Button>
     );
-  }
+}
 
 export default function PhoneForm() {
   const searchParams = useSearchParams()
   const pathname = usePathname();
+  const router = useRouter();
+
   const message = searchParams.get('message')
   const messageType = searchParams.get('type')
   const phoneParam = searchParams.get('phone')
@@ -36,39 +38,39 @@ export default function PhoneForm() {
   const [otpSent, setOtpSent] = useState(!!phoneParam)
   const [error, setError] = useState<string | null>(null)
   
-  const [resendCooldown, setResendCooldown] = useState(30);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startCooldown = useCallback(() => {
+    setResendCooldown(30);
+    timerRef.current = setInterval(() => {
+        setResendCooldown((prev) => {
+            if (prev <= 1) {
+                clearInterval(timerRef.current!);
+                return 0;
+            }
+            return prev - 1;
+        });
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     if (otpSent) {
-      timerRef.current = setInterval(() => {
-        setResendCooldown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current!);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      startCooldown();
     } else {
         if(timerRef.current) clearInterval(timerRef.current);
-        setResendCooldown(30);
     }
     return () => {
         if (timerRef.current) clearInterval(timerRef.current)
     };
-  }, [otpSent]);
+  }, [otpSent, startCooldown]);
 
-  // Sync the phone number from URL params to state
   useEffect(() => {
     if (phoneParam) {
       setPhone(phoneParam)
-      setOtpSent(true)
-    } else {
-      setPhone('')
-      setOtpSent(false)
+      if(!otpSent) setOtpSent(true)
     }
-  }, [phoneParam])
+  }, [phoneParam, otpSent]);
 
   const handleSendOtp = (formData: FormData) => {
     const phoneValue = formData.get('phone') as string;
@@ -77,8 +79,14 @@ export default function PhoneForm() {
       return;
     }
     setError(null)
-    setResendCooldown(30);
     sendOtp(formData)
+  }
+
+  const handleDifferentNumber = () => {
+    setOtpSent(false);
+    setPhone('');
+    // Navigate to clean up URL params
+    router.push(pathname);
   }
 
   return (
@@ -90,7 +98,7 @@ export default function PhoneForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {message && (messageType === 'otp-error' || messageType === 'otp-sent') && (
+        {message && messageType?.startsWith('otp-') && (
           <Alert variant={messageType === 'otp-error' ? 'destructive' : 'default'}>
             <AlertTitle>{messageType === 'otp-error' ? 'Error' : 'Info'}</AlertTitle>
             <AlertDescription>{message}</AlertDescription>
@@ -138,12 +146,8 @@ export default function PhoneForm() {
             </div>
             <PhoneSubmitButton className="w-full">Verify Code & Sign In</PhoneSubmitButton>
             <div className="flex justify-between items-center">
-                <Button variant="link" size="sm" className="p-0 h-auto" onClick={() => {
-                    setOtpSent(false)
-                    // Reset URL state by navigating
-                    window.history.pushState({}, '', '/login');
-                }}>
-                Use a different number
+                <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleDifferentNumber}>
+                    Use a different number
                 </Button>
                 
                 <form action={handleSendOtp}>
