@@ -127,9 +127,12 @@ const Header = () => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-       if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT') {
         // hard reload to clear all state
         window.location.href = '/';
+      }
+      if (event === 'INITIAL_SESSION') {
+        setLoading(false);
       }
     });
 
@@ -149,8 +152,8 @@ const Header = () => {
             </Button>
               {loading ? (
                 <div className="flex items-center gap-4">
-                  <Skeleton className="h-8 w-16" />
-                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-24" />
+                  <Skeleton className="h-9 w-9 rounded-full" />
                 </div>
               ) : user ? (
                 <UserMenu user={user} />
