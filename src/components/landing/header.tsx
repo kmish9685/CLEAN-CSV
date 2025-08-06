@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState, Fragment } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Menu, Transition } from '@headlessui/react'
-import { ChevronDownIcon, CreditCardIcon, ArrowRightOnRectangleIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+import { CreditCardIcon, ArrowRightOnRectangleIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 
 import {
   Avatar,
@@ -23,6 +23,7 @@ const UserMenu = ({ user }: { user: User }) => {
   const supabase = createClient();
   const signOut = async () => {
     await supabase.auth.signOut();
+    // Redirect will be handled by auth listener
   };
 
   const getInitials = (email: string) => {
@@ -59,6 +60,17 @@ const UserMenu = ({ user }: { user: User }) => {
                 {user.email}
                 </p>
             </div>
+             <Menu.Item>
+                {({ active }) => (
+                    <Link
+                    href="/app"
+                    className={`group flex w-full items-center px-4 py-2 text-sm ${active ? 'bg-secondary text-card-foreground' : 'text-card-foreground'}`}
+                    >
+                    <CreditCardIcon className="mr-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                    Dashboard
+                    </Link>
+                )}
+            </Menu.Item>
             <Menu.Item>
               {({ active }) => (
                  <div className={`flex justify-between items-center px-4 py-2 text-sm ${active ? 'bg-secondary' : ''}`}>
@@ -115,6 +127,10 @@ const Header = () => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+       if (event === 'SIGNED_OUT') {
+        // hard reload to clear all state
+        window.location.href = '/';
+      }
     });
 
     return () => {
@@ -132,7 +148,10 @@ const Header = () => {
                 <QuestionMarkCircleIcon className="mr-2 h-5 w-5"/> How It Works
             </Button>
               {loading ? (
-                <Skeleton className="h-8 w-8 rounded-full" />
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-8 w-16" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
               ) : user ? (
                 <UserMenu user={user} />
               ) : (
@@ -141,7 +160,7 @@ const Header = () => {
                     <Link href="/login">Log In</Link>
                   </Button>
                   <Button asChild>
-                     <Link href="/login">Sign Up</Link>
+                     <Link href="/login?tab=signup">Sign Up</Link>
                   </Button>
                 </>
               )}

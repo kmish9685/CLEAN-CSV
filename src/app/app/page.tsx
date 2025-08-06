@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Star, MailWarning } from 'lucide-react';
 import Link from 'next/link';
+import { signOut } from './actions';
 
 async function App() {
   const cookieStore = cookies();
@@ -17,14 +18,6 @@ async function App() {
   if (!user) {
     return redirect('/login');
   }
-
-  const signOut = async () => {
-    'use server';
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-    await supabase.auth.signOut();
-    return redirect('/');
-  };
 
   const maskEmail = (email: string | undefined) => {
     if (!email) return "";
@@ -86,7 +79,7 @@ async function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Basic Cleaning</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><CheckCircle className="text-primary" /> Basic Cleaning</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">Access standard data cleaning templates.</p>
@@ -96,7 +89,7 @@ async function App() {
               <Card>
                  <CardHeader>
                    <CardTitle className="flex items-center gap-2">
-                     <Star className={"text-muted-foreground"} /> AI-Powered Suggestions
+                     <Star className={"text-primary"} /> AI-Powered Suggestions
                    </CardTitle>
                  </CardHeader>
                  <CardContent>
