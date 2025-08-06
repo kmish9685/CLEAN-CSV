@@ -51,92 +51,100 @@ function LoginPageContent() {
     setIsClient(true);
   }, []);
 
+  if (!isClient) {
+    return (
+      <div className="w-full max-w-sm mx-4">
+        <Card className="h-[480px] flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-secondary p-4">
-       <div className="absolute top-8 left-8">
-            <Logo />
-       </div>
-       {isClient ? (
-          <Tabs defaultValue={defaultTab} className="w-full max-w-sm mx-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="phone">Phone</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-                  <CardDescription>
-                    Enter your credentials to access your account.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <AuthMessages />
-                  <form action={login} className="space-y-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" name="email" type="email" placeholder="you@example.com" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <div className="flex items-center justify-between">
-                          <Label htmlFor="password">Password</Label>
-                          <Link href="/forgot-password" passHref>
-                             <Button variant="link" size="sm" className="p-0 h-auto text-xs">
-                               Forgot Password?
-                             </Button>
-                          </Link>
-                      </div>
-                      <Input id="password" name="password" type="password" required />
-                    </div>
-                    <SubmitButton className="w-full">Login</SubmitButton>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="phone">
-              <PhoneForm />
-            </TabsContent>
-            <TabsContent value="signup">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-2xl">Create an Account</CardTitle>
-                  <CardDescription>
-                    Join us! It only takes a second to get started.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <AuthMessages />
-                  <form action={signup} className="space-y-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="email-signup">Email</Label>
-                      <Input id="email-signup" name="email" type="email" placeholder="you@example.com" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="password-signup">Password</Label>
-                      <Input id="password-signup" name="password" type="password" required />
-                    </div>
-                    <SubmitButton className="w-full">Sign Up</SubmitButton>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <div className="w-full max-w-sm mx-4">
-             <Card className="h-[480px] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-             </Card>
-          </div>
-        )}
-    </div>
+      <Tabs defaultValue={defaultTab} className="w-full max-w-sm mx-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="login">Login</TabsTrigger>
+          <TabsTrigger value="phone">Phone</TabsTrigger>
+          <TabsTrigger value="signup">Sign Up</TabsTrigger>
+        </TabsList>
+        <TabsContent value="login">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+              <CardDescription>
+                Enter your credentials to access your account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <AuthMessages />
+              <form action={login} className="space-y-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" placeholder="you@example.com" required />
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      <Link href="/forgot-password" passHref>
+                          <Button variant="link" size="sm" className="p-0 h-auto text-xs">
+                            Forgot Password?
+                          </Button>
+                      </Link>
+                  </div>
+                  <Input id="password" name="password" type="password" required />
+                </div>
+                <SubmitButton className="w-full">Login</SubmitButton>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="phone">
+          <PhoneForm />
+        </TabsContent>
+        <TabsContent value="signup">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Create an Account</CardTitle>
+              <CardDescription>
+                Join us! It only takes a second to get started.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <AuthMessages />
+              <form action={signup} className="space-y-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email-signup">Email</Label>
+                  <Input id="email-signup" name="email" type="email" placeholder="you@example.com" required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="password-signup">Password</Label>
+                  <Input id="password-signup" name="password" type="password" required />
+                </div>
+                <SubmitButton className="w-full">Sign Up</SubmitButton>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div>Loading...</div></div>}>
-      <LoginPageContent />
-    </Suspense>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-secondary p-4">
+        <div className="absolute top-8 left-8">
+            <Logo />
+        </div>
+        <Suspense fallback={
+          <div className="w-full max-w-sm mx-4">
+            <Card className="h-[480px] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </Card>
+          </div>
+        }>
+            <LoginPageContent />
+        </Suspense>
+    </div>
   );
 }

@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const publicAuthRoutes = ['/login', '/forgot-password', '/reset-password', '/signup'];
+  const publicAuthRoutes = ['/login', '/forgot-password', '/reset-password'];
 
   // If the user is logged in and trying to access a public-only route
   // (like login, signup, or the main landing page), redirect them to the dashboard.

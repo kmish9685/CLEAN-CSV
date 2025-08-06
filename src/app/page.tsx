@@ -12,24 +12,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Hero from "@/components/landing/hero";
 import HowItWorks from "@/components/landing/how-it-works";
 
-export default async function Home() {
+export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1">
-        <Suspense fallback={
-          <div className="container mx-auto max-w-7xl px-4 py-20 sm:py-24">
-            <Skeleton className="h-[400px] w-full" />
-          </div>
-        }>
-          <Hero />
-          <SocialProof />
-          <Tool />
-          <Solution />
-          <Pricing />
-          <Testimonials />
-          <Faq />
-        </Suspense>
+        <Hero />
+        <SocialProof />
+        <HowItWorks />
+        <Tool />
+        <Solution />
+        <Pricing />
+        <Testimonials />
+        <Faq />
       </main>
       <Footer />
     </div>
