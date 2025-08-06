@@ -1,10 +1,14 @@
 import { Resend } from 'resend';
 import Handlebars from 'handlebars';
-import template from '../../templates/emailTemplate.hbs';
+import fs from 'fs';
+import path from 'path';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const compiledTemplate = Handlebars.compile(template);
+// Read the template file from the filesystem
+const templatePath = path.join(process.cwd(), 'templates', 'emailTemplate.hbs');
+const templateSource = fs.readFileSync(templatePath, 'utf8');
+const compiledTemplate = Handlebars.compile(templateSource);
 
 export async function sendVerificationEmail(email: string, token: string) {
   // Use the site URL from environment variables for the confirmation link
