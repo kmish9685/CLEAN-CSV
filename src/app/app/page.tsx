@@ -5,10 +5,11 @@ import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Star, MailWarning } from 'lucide-react';
+import { MailWarning } from 'lucide-react';
 import Link from 'next/link';
 import { signOut } from './actions';
 import HowItWorks from '@/components/landing/how-it-works';
+import Tool from '@/components/landing/tool';
 
 async function App() {
   const cookieStore = cookies();
@@ -86,6 +87,7 @@ async function App() {
         </div>
         
         <HowItWorks />
+        <Tool />
       </main>
     </div>
   );
