@@ -37,6 +37,7 @@ export default async function Home() {
           <Tool />
           <SocialProof />
           <Solution />
+          <HowItWorks />
           <Pricing />
           <Testimonials />
           <Faq />

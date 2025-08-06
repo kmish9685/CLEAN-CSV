@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { Check, Lock } from "lucide-react";
 import Image from "next/image";
-import HowItWorks from "@/components/landing/how-it-works";
 
 const Hero = () => (
   <section id="hero" className="bg-gradient-to-b from-background to-secondary/40 py-20 sm:py-32">

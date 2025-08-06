@@ -1,42 +1,56 @@
 
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { UploadCloud, Wand2, Download } from "lucide-react";
+import { Card, CardDescription, CardTitle, CardHeader } from "@/components/ui/card";
+import { UploadCloud, Wand2, Download, Eye } from "lucide-react";
 
 const steps = [
   {
     icon: UploadCloud,
-    title: "Upload",
-    description: "Drag & drop your messy CSV file.",
+    title: "1. Upload",
+    description: "Drag & drop your messy CSV file into the tool section below.",
+  },
+  {
+    icon: Eye,
+    title: "2. Preview",
+    description: "See a preview of your data before and after cleaning.",
   },
   {
     icon: Wand2,
-    title: "Clean",
-    description: "Select from our cleaning templates.",
+    title: "3. Clean",
+    description: "Select from AI suggestions, templates, or custom rules to clean your data.",
   },
   {
     icon: Download,
-    title: "Download",
-    description: "Get your perfectly formatted data.",
+    title: "4. Download",
+    description: "Download your perfectly formatted data with a single click.",
   },
 ];
 
 const HowItWorks = () => (
-  <div id="how-it-works" className="w-full">
-      <h2 className="font-headline text-base font-bold tracking-tight text-foreground text-center mb-2">How It Works</h2>
-      <div className="grid grid-cols-1 gap-2">
-        {steps.map((step) => (
-           <Card key={step.title} className="text-left transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg bg-card/80 backdrop-blur-sm p-2 flex items-center gap-2">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary flex-shrink-0">
-                <step.icon className="h-4 w-4" />
+    <section id="how-it-works" className="py-20 sm:py-24 bg-secondary">
+        <div className="container mx-auto max-w-7xl px-4">
+            <div className="text-center">
+                <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                    A Simple, 4-Step Process
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground">
+                    Cleaning your data has never been this easy.
+                </p>
             </div>
-            <div>
-              <CardTitle className="font-headline text-xs mb-1">{step.title}</CardTitle>
-              <CardDescription className="text-xs">{step.description}</CardDescription>
+            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+                {steps.map((step) => (
+                <Card key={step.title} className="text-center transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl">
+                    <CardHeader>
+                        <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <step.icon className="h-8 w-8" />
+                        </div>
+                    </CardHeader>
+                    <CardTitle className="font-headline text-xl mb-2">{step.title}</CardTitle>
+                    <CardDescription className="p-4 pt-0">{step.description}</CardDescription>
+                </Card>
+                ))}
             </div>
-          </Card>
-        ))}
-      </div>
-    </div>
+        </div>
+    </section>
 );
 
 export default HowItWorks;
